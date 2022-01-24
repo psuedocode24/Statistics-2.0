@@ -1,0 +1,1425 @@
+---
+title: "441 Homework 4"
+author: 'ASHI MALIK'
+output:
+  html_document:
+    code_folding: hide
+    toc: yes
+    toc_float:
+      collapsed: yes
+      smooth_scroll: yes
+  pdf_document:
+    toc: yes
+---
+
+
+## Question 1
+### a
+### Reading the data
+
+```{r}
+Ques1 <- read.csv("Download.csv")
+
+#### Running Multiple Regression Model ####
+time <- Ques1$Transfer.Time..sec.
+size <- Ques1$File.Size..MB.
+hour <- Ques1$Hours.past.8
+
+full_model <- lm(time ~ size + hour)
+summary(full_model)
+
+```
+INTERPRETATIONS:
+The regression equation is Time_of_Transfer = 10.0581 + 0.2972*Size_of _file -2.0238*hours_past_eight+ e
+Although the intercept is statistically significant the coefficients are not statistically significant thus the coefficients of the independent variables cannot interpreted. 
+
+R-square, Adj. R-square and Standard Error:
+The value of R^2 after running a multiple regression model is 0.7871. Implying the the size of the file and hours that are past eight are capable of explaining the 78.71% variation in the data and the rest 21.29% of explanation remains unexplained. The value of Adjusted R^2 is 0.7621 after running the multiple regression model.  The standard Error is 2.63 after the regression model is run.
+
+Global F-test:To check the validity of the model
+Hypothesis:
+H0:beta_1=beta_2=0
+H1:Atleast one beta_i != 0
+
+After running the Global F-test  the p-value obtained is 1.945e-06. This shows that the p-value is statically significant. Hence we reject the Null Hypothesis and conclude that the overall model is valid.
+
+Individual t-test: To check the lineraity of the model
+Filesize
+H0:beta_1=0
+H1:beta_1≠0
+
+After running the Individual T-test  the p-value obtained is 0.06796. This shows that the p-value is greater than 0.05 implying to fail to reject the null hypothesis at 0.05 significance level. Thus concluding that the size of the file is not linearly related with the time of transfer. 
+
+Hours past eight
+H0:beta_2=0
+H1:beta_2≠0
+
+After running the Individual T-test  the p-value obtained is 0.46029. This shows that the p-value is greater than 0.05 implying to fail to reject the null hypothesis at 0.05 significance level. Thus concluding that the hours past eight is not linearly related with the time of transfer. 
+
+### b 
+### Time of Transfer and Size of The File Model.
+
+H0:rho=0(No correlation)
+
+H1:rho!=0(There is a correlation)
+```{r}
+size_model <- lm(time ~ size)
+summary(size_model)
+```
+INTERPRETATION 
+The Regression Equation Is : Time_Of_Transfer  =11.69015+0.18337∗size_of_file + e
+
+Intercept Coefficient (beta_0): The Intercept Coefficient's estimate is 11.69015 which indicated that the value of time of transfer it takes when the size of the file is zero and does make any logical sense.
+
+Slope Coefficient (beta_1): The Slope Coefficient's estimate is 0.18337 which indicated that for every 1MB increase in the size of the file the time of transfer od files increases by 0.18337 seconds and makes logical sense as well. 
+
+R-square, Adj. R-square and Standard Error
+The Vale of R^2 after running the simple linear regression model is 0.78. Implying that the size of the file can be used to explain the 78% of variation in the data and the rest 22% of the variation in the data is unexplained. The value of adjusted R^2 is 0.7678 after running the multiple regression model. The standard error by running the model 2.6.  
+
+Global F-test(To check the validity of the model)
+Hypothesis:
+H0:beta_1=0
+H1:beta_1 ≠0.The overall model is valid
+
+After running the Global F-test the p-value is 2.502e-07. Implying that the null hypothesis is rejected at all the significance levels and thus concluding that the model is valid overall.
+
+### c
+###Time of Transfers and Hours past Eight Model.
+
+```{r}
+####  Regression Model
+hour_model <- lm(time ~ hour)
+summary(hour_model)
+
+```
+INTERPRETATION:
+
+The Regression Equation Is: Time_Of_Transfer=14.6100+3.1368∗hour+e
+
+Intercept Coefficient's Interpretation (beta_0): The Intercept Coefficient's estimate is 14.6100 which implies that the value of hours is zero after 8.
+
+Slope Coefficient's Interpretation (β1): The Slope Coefficient's estimate is 3.1368 which implies that with every increase for every one hour after 8 then time of transfer increases by 3.1368 seconds.
+
+R-square, Adj. R-square and Standard Error
+The value of R^2 is 0.7379 after running the simple linear regression. Implying that the size of the file is capable of explaining 73.79% variation in the data while the rest 26.21% remains unexplained. The value of adjusted R^2 is 0.7251. The value of standard error by running the model is 2.89.
+
+Global F-test(To check the validity of the model)
+Hypothesis:
+H0:beta_1=0
+H1:beta_1!=0. The overall model is valid
+
+After running the Global F-test the p-value is 1.169e−06 which statically very significant. Thus rejecting the null hypothesis at all reasonable significance levels and concluding that the overall model is valid. 
+
+Part B: Inference
+By comparing the two models the Simple Regression Model of the individual variables it is observed that adding the other variable does not improve the fit of the overall model significantly as the other variables that are used in the second model.
+
+```{r}
+vif <- car::vif(full_model)
+vif
+```
+It is observed that the VIF of both the size of the file and Hours after eight is 43.0782 which indicates a strong presence of multi-collinearity.
+
+```{r}
+### To check correlation between Filesize and Hours After 8
+corr <- cor(size, hour)
+corr
+```
+
+The correlation between the size of the file and hours after eight is 0.9883 which indicates almost perfect collinearity. Thus leading to inflation in the variance of the estimates with each of the individual coefficients, thereby resulting in deflating the t statistic for the coefficients and causing the coefficients to be statistically insignificant.
+
+###Question 2
+### Reading the csv file.
+
+```{r}
+# Correlation Matrix
+Ques2 <- read.csv("PassengerCars.csv")
+##Plotting the scatterplot
+plot(Ques2[,2:7])
+##Part A
+##Building a linear model
+x2 <- Ques2$X2
+x3 <- Ques2$X3
+x4 <- Ques2$X4
+x5 <- Ques2$X5
+x6 <- Ques2$X6
+y <- Ques2$Y
+
+linear_model <- lm(y ~ x2 + x3 + x4 + x5 + x6)
+summary(linear_model)
+```
+Regression Equation and interpretation
+y=2933.9057+50.5378∗x2−103.5042∗x3+6.1158∗x4−105.9787∗x5+0.1238∗x6+ϵ
+
+We do not interpret the coefficient of the variables since they are not statistically significant
+
+R-square, Adj. R-square and Standard Error
+The R2 value on running the multiple regression is 0.7545. This means that productivity is able to explain 74.45% of the variation in the data and 25.55% of the variation remains unexplained. The adjusted R2 value on running the multiple regression is 0.6318. The standard error of running the model is 706.1 on 10 degrees of freedom.
+
+Global F-test
+Hypothesis:
+H0:β1=β2=β3=β4=β5=0
+H1:Atleast 1 βi≠0
+
+The p-value of running the Global F-test is 0.007426. Hence we reject the null hypothesis at 0.05 significance level and conclude that overall model is valid and there exists a linear relationship between the variables.
+
+Individual t-test
+x2
+H0:β1=0
+H1:β1≠0
+
+The p-value of running the individual t-test is 0.4850. Hence, we fail to reject the null hypothesis at 0.05 significance level and conclude that x2 is not linearly related with y
+
+x3
+H0:β2=0
+H1:β2≠0
+
+The p-value of running the individual t-test is 0.0705. Hence, we fail to reject the null hypothesis at 0.05 significance level and conclude that x3 is not linearly related with y
+
+x4
+H0:β1=0
+H1:β1≠0
+
+The p-value of running the individual t-test is 0.1306. Hence, we fail to reject the null hypothesis at 0.05 significance level and conclude that x4 is not linearly related with y
+
+x5
+H0:β2=0
+H1:β2≠0
+
+The p-value of running the individual t-test is 0.5014. Hence, we fail to reject the null hypothesis at 0.05 significance level and conclude that x5 is not linearly related with y
+
+x5
+H0:β2=0
+H1:β2≠0
+
+The p-value of running the individual t-test is 0.5014. Hence, we fail to reject the null hypothesis at 0.05 significance level and conclude that x5 is not linearly related with y
+
+x6
+H0:β2=0
+H1:β2≠0
+
+The p-value of running the individual t-test is 0.3367. Hence, we fail to reject the null hypothesis at 0.05 significance level and conclude that x6 is not linearly related with y
+
+Checking the VIF for the model
+
+```{r }
+car::vif(linear_model)
+##Based on the VIF values, we can see that there is a strong indication of multicollinearity in the given variables
+
+##Building a log linear model
+log_linear <- lm(log(y) ~ log(x2) + log(x3) + log(x4) + log(x5) + log(x6))
+summary(log_linear)
+
+```
+
+Regression Equation and interpretation
+log(y)=3.25486+1.79015∗log(x2)−4.10852∗log(x3)+2.12720∗log(x4)−0.03045∗log(x5)+0.27779∗x6+ϵ
+
+We do not interpret the coefficient of the variables since they are not statistically significant
+
+R-square, Adj. R-square and Standard Error
+The R2 value on running the multiple regression is 0.8548. This means that productivity is able to explain 85.48% of the variation in the data and 24.62% of the variation remains unexplained. The adjusted R2 value on running the multiple regression is 0.7822. The standard error of running the model is 0.05581 on 10 degrees of freedom.
+
+Global F-test
+Hypothesis:
+H0:β1=β2=β3=β4=β5=0
+H1:Atleast 1 βi≠0
+
+The p-value of running the Global F-test is 0.000624. Hence we reject the null hypothesis at 0.05 significance level and conclude that overall model is valid and there exists a linear relationship between the variables.
+
+We select the log linear model to proceed with because it will help us better gauge the effect of percentage change in one variable with the percentage change in the other variable
+
+Part B
+
+```{r }
+car::vif(log_linear)
+##Checking the VIF of the variables under consideration in the log linear model, if we include all the variables we ##are bound to run into multicollinearity problems. Hence we should eliminate some of the variables to remedy the ##issue of multicollinearity
+
+cor(cars)
+
+##Looking at the correlation matrix, we observe high correlation between X2, X3 and X4. Hence we will have to ##eliminate some of these variables to deal with the issue of multicollinearity
+
+##Part C
+
+final_model <- lm(log(y) ~  log(x3) + log(x4) + x5)
+summary(final_model)
+
+car::vif(final_model)
+
+cor(Ques2$X3,Ques2$X4)
+```
+
+Regression Equation and interpretation
+log(y)=7.954953−2.812389∗log(x3)+2.214078∗log(x4)−0.009731∗x5+ϵ
+
+Interpreting Intercept Coefficient (β0): The estimate of the intercept coefficient is 7.954953. This indicates the .
+
+Interpreting the coefficient for x3 (β1): The estimate of the x3 coefficient is -2.812389. This means that with 1 percent increase in x3 decreases y by 2.812389 percent, keeping x4 and x5 constant
+
+Interpreting the coefficient for x4 (β2): The estimate of the x4 coefficient is 2.214078. This means that with 1 percent increase in x4 increases y by 2.214078 percent, keeping x3 and x5 constant
+
+We do not interpret the coefficient of x5 because it is not statistically significant
+
+R-square, Adj. R-square and Standard Error
+The R2 value on running the multiple regression is 0.7343. This means that numports, bandwidth and portspeed are able to explain 73.43% of the variation in the data and 26.57% of the variation remains unexplained. The adjusted R2 value on running the multiple regression is 0.6678. The standard error of running the model is 0.06892 on 12 degrees of freedom.
+
+Global F-test
+Hypothesis:
+H0:β1=β2=β3=0
+H1:Atleast one βi ≠0
+
+The p-value of running the Global F-test is 0.0009. Hence we reject the null hypothesis at all reasonable significance levels and conclude that overall model is valid.
+
+Individual t-test
+x3
+H0:β1=0
+H1:β1≠0
+
+The p-value of running the individual t-test is 0.00168. Hence, we reject the null hypothesis at all reasonable significance level and conclude that x3 is linearly related with y
+
+x4
+H0:β2=0
+H1:β2≠0
+
+The p-value of running the individual t-test is 0.00129. Hence, we reject the null hypothesis at any reasonable significance level and conclude that x4 is linearly related with y
+
+x5
+H0:β3=0
+H1:β3≠0
+
+The p-value of running the individual t-test is 0.34309. Hence, we fail to reject the null hypothesis at 0.05 significance level and conclude that x5 is not linearly related with y
+
+Interpretation
+We have removed the variable X2 since X3 factors the complete effect of inflation and not just the variation in the prices of cars. Thus it is a better measure of understanding the financial situation of a family. For eg. A family buying car would not just depend on the CPI of cars but rather it would depend on the overall CPI in general
+
+We can still observe high correlation between X3 and X4 but we have decided to keep both into consideration. The reason being Consumer Price Index and the Personal Disposable Index both are integral to understanding the consumer purchasing capacity and hence they have been kept into consideration
+
+Besides these, we have also excluded the variable X6 from consideration. The reason being some people in the population would already own a car and if we keep this variable then we would end up counting the population again which would not make logical sense.
+
+
+###Question 3
+
+```{r }
+##Reading the data
+Ques3 <- read.csv("CommNodes.csv")
+##Plotting the Scatterplot
+plot(Ques3)
+##Checking the correlation between the variables
+Hmisc::rcorr(as.matrix(Ques3))
+```
+From the test for correlation, it can be identified that there is a substantial correlation between Numports and PortSpeed which lead to introduction of  multicollinearity in the model.
+
+```{r}
+##Building Full Regression Model
+cost <- Ques3$COST
+ports <- Ques3$NUMPORTS
+bandwidth <- Ques3$BANDWIDTH
+portspeed <- Ques3$PORTSPEED
+
+model_full <- lm(cost ~ ports + bandwidth + portspeed)
+summary(model_full)
+```
+INTERPRETATION:
+The Regression Equation Is: cost=17487.41−14167.77∗numports+81.39∗bandwidth+1523.70∗portspeed+e
+
+Intercept Coefficient's Interpretation (beta_0): The intercept coefficient's estimate is 17487.41 which indicates that the cost of setting up a new node when numports, bandwidth and portspeed are all zero that does not make any logical sense.
+
+Coefficient for bandwidth's Interpretation (beta_2): The  bandwidth coefficient's estimate is 81.39 which means that with 1 unit increase in bandwidth the increase in the cost of adding a new port increases by 81.39 units, when keeping numports and portspeed constant
+
+The interpretation of numports and portspeed are not statically significant.
+
+R-square, Adj. R-square and Standard Error
+The value of R^2 after running the multiple regression is 0.9518. Implying that the numports, bandwidth and portspeed are able to explain 95.18% of the variation in the data and the rest 4.82% of the variation remains unexplained. The value of  adjusted R^2 after running the multiple regression is 0.9374. The standard error of running the model is 3084 on 10 degrees of freedom.
+
+Global F-test(To check the validity of the model)
+Hypothesis:
+H0:beta1=beta2=beta3=0
+H1:Atleast one betai ≠0
+
+After running the Global F-test the p-value is 6.888e−07 which is statically significant. Thus the null hypothesis is rejected at all reasonable significance levels and thus we conclude that the model is valid.
+
+Individual t-test(To check the linearity of the model)
+Numports
+H0:beta1=0
+H1:beta1≠0
+
+After running the Individual T-test the p-value is 0.61457 which is statically not significant. Thus failing to reject the null hypothesis at 0.05 significance level and concluding that the Numports is not linearly related with the set up cost.
+
+Bandwidth
+H0:beta2=0
+H1:beta2≠0
+
+After running the Individual T-test the p-value is 0.00458. Thus rejecting the null hypothesis at any reasonable significance levels and conculding the Bandwidth is linearly related with the set up cost.
+
+Portspeed
+H0:beta3=0
+H1:beta3≠0
+
+After running the individual t-test is 0.60306. Thus failing to reject the null hypothesis at 0.05 significance levels and concluding that the Portspeed is not linearly related with the set up cost.
+
+Even though the overall model is  statistically significant and valid, only one of the coefficient is significant which indicates the presence of multicollinearity.
+
+
+```{r}
+##Check for Multicollinearity
+car::vif(model_full)
+```
+Based on the values of  VIF for the independent variables of the full model, it can be concluded that the significant collinearity exists between Numports and Portspeed. Thus only one of these variables needs to be considered. As logically it makes more sense to include number of ports as an explanatory variable as the increasing number of ports will have a tangible effect on the set up cost.
+
+```{r}
+##Build a partial regression model
+Ques3_partial <- lm(cost ~ ports + bandwidth)
+summary(Ques3_partial)
+```
+Interpretation:
+The Regression Equation is: cost=17085.75+469.03∗numports+81.07∗bandwidth+e
+
+Intercept Coefficient's Interpretation (beta0): The intercept coefficient's estimate is 17085.75. Implying the cost of setting up a new node when numports, bandwidth are all zero which does not make any logical sense.
+
+Coefficient for numports's Interpretation (beta1):  The numports coefficient;s estimate is 469.03. Implying that  with 1 unit increase in numports which increases the cost of adding a new port by 469.03 units, by keeping bandwidth constant.
+
+The coefficient for bandwidth's Interpretaiton (beta_2):The bandwidth coefficient's estimate is 81.07. Implying that with 1 unit increase in bandwidth which increases the cost of adding a new port by 81.07 units, by keeping numports constant.
+
+R-square, Adj. R-square and Standard Error
+The value of R^2 after running the multiple regression is 0.9504. Implying that the numports and bandwidth are capable of explaining the 95.04% of the variation in the data and the rest 4.96% of the variation remains unexplained. The value of adjusted R2 after running the multiple regression is 0.9414.. The standard error of running the model is 2983 on 11 degrees of freedom.
+
+Global F-test(To check the validity of the model)
+Hypothesis:
+H0:beta1=beta2=0
+H1:Atleast one betai !=0
+
+After running the Global F-test the p-value is 6.666e−08 which is statiscally significant. Thus rejecting the null hypothesis at ll reasonable significance levels and concluding that the overall model is valid.
+
+Individual t-test(To check the lineratiy of the model)
+
+Numports
+H0:beta1=0
+H1:beta1≠0
+
+After running the Individual T-test the p-value is 2.26e-05 which is statiscally significant. Thus rejecting the null hypothesis at all reasonable levels and concluding  that the  Numports is linearly related with the set up cost.
+
+
+Bandwidth
+H0:beta2=0
+H1:beta2≠0
+
+After running the Individual T-test the p-value is 0.00324 which is statiscally significant. Thus rejecting the null hypothesis at all reasonable levels and concluding  that the  Bandwidth is linearly related with the set up cost.
+
+```{r}
+##Check for multicollinearity in the partial model
+car::vif(Ques3_partial)
+```
+
+It can be observed that when the variable portspeed is removed, the VIF between the remaining variables is reduced to 2.089663,that is well within the acceptable threshold. Additionally, the overall model is statistically significant along with the explanatory variables which are also statistically significant. Thus h the partial model is good model to estimate the cost of addition of new variables.
+
+
+```{r}
+###Question 4
+##Reading the Data
+Ques4 <- read.csv("Wage.csv")
+
+##Run the Spearman Rank Correlation test for Heteroscedasticity
+Wage <- Ques4$Wage
+Education <- Ques4$Educ
+Experience <- Ques4$Exper
+```
+
+Check for heteroscedasticity in Education 
+Hypothesis:
+H0: No evidence of Heteroscedasticity in Education
+H1: Evidence of Heteroscedasticity in Education is present.
+
+```{r}
+educationmodel <- lm(Wage ~ Education + Experience)
+summary(educationmodel)
+
+# Get the residuals
+education_resi <- residuals(educationmodel)
+abs_resi <- abs(education_resi)
+
+# Run the spearman correlation test on Education
+cor.test(x = Education,  y = abs_resi, alternative = "greater", method = "spearman", exact = FALSE)
+##Spearman's rank correlation rho
+## 
+## data:  Education and abs_resi
+## S = 18213931, p-value = 2.337e-08
+## alternative hypothesis: true rho is greater than 0
+## sample estimates:
+##       rho 
+## 0.2360737
+```
+
+After running the Spearman Rank correlation test  the p-value is 2.337e-08 which is statistically significant. Thus rejecting the null hypothesis at all reasonable significant level and concluding that the heteroscedasticity exists in Education variable.
+
+Check for heteroscedasticity in Experience
+Hypothesis
+H0: No evidence of Heteroscedasticity in Experience.
+H1: Evidence of Heteroscedasticity in Experience is present.
+
+```{r}
+# Run the spearman correlation test on Experience
+cor.test(x = Experience, y = abs_resi, alternative = "greater",method = "spearman", exact = FALSE)
+##Spearman's rank correlation rho
+## 
+## data:  Experience and abs_resi
+## S = 21950708, p-value = 0.03491
+## alternative hypothesis: true rho is greater than 0
+## sample estimates:
+##       rho 
+## 0.0793463
+```
+
+After running the Spearman Rank correlation test the p-valueis 0.03491.Thus rejecting the null hypothesis at all reasonable significant levels and concluding that the heteroscedasticity exists in Experience variables.
+
+```{r}
+##Question 5
+## Read the data
+Ques5 <- read.csv("Compensation.csv")
+library(data.table)
+Ques5_transpose <- transpose(Ques5)
+
+rownames(Ques5_transpose) <- colnames(Ques5)
+colnames(Ques5_transpose) <- rownames(Ques5)
+Ques5_transpose <- Ques5_transpose[2:length(Ques5_transpose),]
+head(Ques5_transpose)
+
+##Run regression of average compensation on average productivity
+##Plot a scatterplot
+productivity <- as.numeric(Ques5_transpose[,13])
+compensation <- as.numeric(Ques5_transpose[,11])
+
+plot(x = productivity,y = compensation,main = "Productivity against Compensation",xlab = "Productivity",ylab ="Compensation")
+abline(lm(compensation ~ productivity))
+model <- lm(compensation ~ productivity)
+summary(model)
+
+## Call:
+## lm(formula = compensation ~ productivity)
+## 
+## Residuals:
+##    Min     1Q Median     3Q    Max 
+## -766.0   63.8  112.4  152.7  216.9 
+## 
+## Coefficients:
+##               Estimate Std. Error t value Pr(>|t|)  
+## (Intercept)  1.906e+03  9.207e+02   2.070   0.0772 .
+## productivity 2.411e-01  9.815e-02   2.457   0.0437 *
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Residual standard error: 331.5 on 7 degrees of freedom
+##   (3 observations deleted due to missingness)
+## Multiple R-squared:  0.463,  Adjusted R-squared:  0.3863 
+## F-statistic: 6.036 on 1 and 7 DF,  p-value: 0.043673
+```
+Interpretation:
+The Regression Equation is: compensation=1906+0.2411∗productivity+e
+
+Intercept Coefficient's Interpretation (beta_0): The intercept coefficient's estimate is 1906 which indicates the compensation when the productivity is all zero which does not make any logical sense.
+
+The coefficient for productivity's Interpretation (beta_1): The productivity coefficient's estimates is 0.2411 which means that with 1 unit increase in productivity there is an increase in the compensation by 0.2411 units.
+
+R-square, Adj. R-square and Standard Error
+The value of R^2 after running the multiple regression is 0.463. Implying  that the productivity is capable to explain 46.3% of the variation in the data and the rest 53.7% of the variation remains unexplained. The vale of adjusted R2 after running the multiple regression is 0.3863. The standard error after running the model is 331.5 on 7 degrees of freedom.
+
+Global F-test/ Individual t-test(To check the validity and linearity of the model)
+Hypothesis:
+H0:beta_1=0
+H1:beta_1≠0
+
+After running the Global F-test the p-value is 0.04367 which is statiscally significant. Thus rejecting the null hypothesis at 0.05 significance level and concluding that the overall model is valid thus there exists a linear relationship between productivity and compensation.
+
+Part A: Obtaining the residuals
+
+```{r}
+model_resi <- residuals(model)
+##Part B: Running Park’s Test
+##Hypothesis
+##H0:  No evidence of Heteroscedasticity.
+##H1:  Evidence of Heteroscedasticity is present.
+
+ln_residuals_sq <- log(model_resi^2)
+log_x <- log(na.omit(productivity))
+
+##Regressing residual square against log(x)
+parks_test <- lm(ln_residuals_sq ~ log_x)
+summary(parks_test)
+```
+The Regression Equation Is: lnu^2_i =32.802−2.477∗ln(productivity)+e
+
+
+After running the Park’s test the p-value for checking the heteroscedasticity is 0.5682 which is not statiscally significant. Thus failing to reject the null hypothesis at all significant levels and concluding that there is no evidence of heteroscedasticity in the data.
+
+Part C: Run the Glejsar Test
+Hypothesis
+H0: No evidence of Heteroscedasticity
+H1: Evidence of Heteroscedasticity is present
+
+Regress mod of residuals on X
+
+```{r}
+abs_residuals <- abs(model_resi)
+
+glejser <- lm(abs_residuals ~ na.omit(productivity))
+summary(glejser)
+```
+
+The Regression Equation is: |u_i^|=383.36479−0.01838∗productivity+e 
+
+After running the Glejser test on X for checking the heteroscedasticity the p-value is 0.7922 which is not statiscally significant. Thus failing to reject the null hypothesis at all significance levels and concluding that there is no evidence of heteroscedasticity in the data.
+
+Regressing mod of residuals on SQRT(X)
+```{r}
+abs_residuals <- abs(model_resi)
+
+glejser_sqrt <- lm(abs_residuals ~ sqrt(na.omit(productivity)))
+summary(glejser_sqrt)
+```
+
+Regression Equation
+|ui^|=383.36479−0.01838∗productivity^(1/2)+e
+
+After running the Glejser test on Sqrt(X) for checking the heteroscedasticity the p-value is 0.81 which is not statically significant. Thus failing to reject the null hypothesis at all significance levels and concluding that there is no evidence of heteroscedasticity in the data.
+
+Part D: Run Spearman Rank Correlation test
+Hypothesis
+H0: No evidence of Heteroscedasticity.
+H1: Evidence of Heteroscedasticity is present.
+```{r}
+spearman_test <- cor.test(x = na.omit(productivity),
+                          y = abs_residuals,
+                          alternative = "greater",
+                          method = "spearman", 
+                          exact = FALSE)
+spearman_test
+
+```
+
+After  running the Spearman Rank correlation test the p-value is 0.8569 which is not statically significant.Thus  failing to reject the null hypothesis at all reasonable significant level and concluding that heteroscedasticity does not exist in the data. 
+
+```{r }
+##Question 6
+##Reading the data
+Ques6 <- read.csv("R&D.csv")
+sales <- Ques6$SALES
+rd <- Ques6$RD
+profit <- Ques6$PROFITS
+##Fit the regression model and calcuate the residuals
+model <- lm(sales ~ rd)
+summary(model)
+
+model_residual <- residuals(model)
+```
+INTERPRETATION:
+
+The Regression Equation is: sales=43941.818+14.994∗RnD+ϵ
+
+Intercept Coefficient's Interpretation (beta_0):  The intercept coefficient's estimate is 43941.818 which indicates the sales when RnD is zero.
+
+The coefficient for RnD's Interpretation (beta_1): The Rnd coefficient's estimate is 14.994 which means that with 1 unit increase in RnD thus increases the sales by 14.99 units.
+
+R-square, Adj. R-square and Standard Error
+The value of R^2 after running the multiple regression is 0.4783. Implying that the productivity is capable to explain 47.83% of the variation in the data and the rest 52.17% of the variation remains unexplained. The calue of adjusted R2 after  running the multiple regression is 0.4457. The standard error by running the model is 59820 on 16 degrees of freedom.
+
+Global F-test/ Individual t-test(To check the validity and linearity of the model )
+Hypothesis:
+H0:beta_1=0
+H1:beta_1≠0
+
+After running the Global F-test the p-value is 0.001476. which is statistically significant. Thus rejecting the null hypothesis at 0.05 significance level and concluding that the overall model is valid and there exists a linear relationship between RnD and sales.
+
+Park’s Test to assess Heteroscedasticity in R&D
+Hypothesis
+H0: No evidence of Heteroscedasticity
+H1: Evidence of Heteroscedasticity is present
+```{r }
+ln_residual_sq <- log(model_residual^2)
+log_x <- log(rd)
+
+parks_test <- lm(ln_residual_sq ~ log_x)
+summary(parks_test)
+```
+
+The Regression Equation is: lnu2i^=19.3868+0.1872∗ln(RD)+e
+
+After running the Parks Test for detecting heteroscedasticity the p-value is 0.332 which is statically not significant. Thus failing to reject the null hypothesis at all reasonable significance levels and conclude that there is no evidence of heteroscedasticity in RD.
+
+Glejser Test
+```{r }
+abs_residuals <- abs(model_residual)
+##Hypothesis
+##H0: No evidence of Heteroscedasticity
+##H1:Evidence of Heteroscedasticity is present
+
+## |ui^|=beat_0+beta_1∗RD+e
+glejser_test <- lm(abs_residuals ~ rd)
+summary(glejser_test)
+```
+The Regression Equation is: |ui^|=32101.846+3.397∗RD+e
+
+After  running the glejser test is the p-value is  0.1813 which is statically not significant. Thus failing to reject the null hypothesis at all reasonable significance levels and concluding that there is no evidence of Heteroscedasticity.
+
+
+```{r}
+glejser_test <- lm(abs_residuals ~ sqrt(rd))
+summary(glejser_test)
+```
+The Regression Equation is:  |ui^|=24789.3+386.4∗RD^(1/2)+e
+
+After running the glejser test the p-value is 0.1915 which is statically insignificant. Thus, failing to reject the null hypothesis at all reasonable significance levels and concluding that there is no evidence of Heteroscedasticity.
+
+```{r }
+reciprocal_rd <- 1/rd
+glejser_test <- lm(abs_residuals ~ reciprocal_rd)
+summary(glejser_test)
+
+```
+The Regression Equation is: |ui^|=45798−1278428/RD+e
+
+After  running the glejser test the p-value is 0.5692 which is statically not significant. Thus ,failing  to reject the null hypothesis at all reasonable significance levels and concluding that there is no evidence of Heteroscedasticity.
+```{r}
+reciprocal_rd <- 1/rd
+glejser_test <- lm(abs_residuals ~ sqrt(reciprocal_rd))
+summary(glejser_test)
+```
+
+The Regression Equation is : |ui^|=52086−245967/RD^(1/2)+ e
+
+After running the glejser test the p-value is 0.3877 which is statically not significant. Thus, failing to reject the null hypothesis at all reasonable significance levels and concluding that there is no evidence of Heteroscedasticity.
+
+White’s Test
+```{r }
+residual_sq <- (model_residual)^2
+
+# Run the auxillary regression
+aux_model <- lm(residual_sq ~ rd + I(rd^2))
+summary(aux_model)
+
+# Calculate the chi-square value
+chi_sq_val <- nrow(rd)*summary(aux_model)$r.squared
+chi_sq_val
+
+# Calculate the critical chi-square value
+chi_sq_critical <- qchisq(0.95, 2)
+chi_sq_critical
+
+# Calculate the p-value corresponding to the chi-sq value
+pchisq(chi_sq_val, 2, lower.tail = FALSE)
+```
+
+The calculated chi-sq statistic is less than the critical value of chi-sq and the p-value is 0.6829892. Thus, failing to reject the null hypothesis and concluding that there is not sufficient evidence of Heteroscedasticity in RnD.
+
+```{r}
+
+##Question 7
+##Reading the data
+Ques7 <- read.csv("FOC.csv")
+
+##Running the base model
+sales <- Ques7$SALES
+time <- Ques7$TIME
+##Plotting the scatterplot
+plot(x = time,
+     y = sales,
+     main = "Sales VS Time",
+     xlab = "Time",
+     ylab = "Sales")
+abline(lm(sales ~ time))
+##Based on the scatterplot, we can observe that as time increases the variance in the data is increasing
+
+linear_model <- lm(sales ~ time)
+summary(linear_model)
+```
+Interpretation:
+
+The Regression Equation is:  sales=4703.77+72.46∗time + e
+
+Intercept Coefficient's Interpretation (beta_0):The intercept coefficient's estimate is 4703.77 which indicates the sales when time is zero that does not make any logical sense.
+
+The coefficient for Time's Interpretation (beta_1): The time coefficient's estimate is 72.46 which means that with 1 unit increase in time  thus increases the sales by 72.46 units.
+
+R-square, Adj. R-square and Standard Error
+The value of R^2 after running the multiple regression is 0.6415 which means that productivity is capable of explaining 64.15% of the variation in the data and the rest 35.85% of the variation remains unexplained. The value of adjusted R^2 after running the multiple regression is 0.6401. The standard error by running the model is 4159 on 263 degrees of freedom.
+
+Global F-test/ Individual t-test(To check the validity and linearity of the model)
+Hypothesis:
+H0:beta_1=0
+H1:beta_1≠0
+
+After running the Global F-test the p-value is 2.2e−16. Thus rejecting the null hypothesis at all reasonable significance level and concluding that the overall model is valid and there exists a linear relationship between time and sales.
+
+Calculate the predicted and the residuals
+```{r}
+residuals_linear <- residuals(linear_model)
+preds_linear <- fitted(linear_model)
+##Informal Methods
+##Plotting the residuals vs fitted graph
+residuals_sq <- residuals_linear^2
+
+plot(x = preds_linear,
+     y = residuals_sq)
+
+##Plotting the residuals vs X graph
+plot(x = time,
+     y = residuals_sq)
+```
+
+It can be seen from both the graphs  that as the time increases there is a FAN pattern being developed. With the increase in time, the residuals are spreading further which is consistent with the initial observation we had from the y vs x scatterplot.
+
+Formal Methods
+Park’s Method
+Hypothesis
+H0: No evidence of Heteroscedasticity
+H1: Evidence of Heteroscedasticity is present.
+
+
+```{r}
+ln_residuals_sq <- log(residuals_sq)
+log_x <- log(time)
+
+parks_test <- lm(ln_residuals_sq ~ log_x)
+summary(parks_test)
+```
+
+The Regression Equation is : ln(u2i^)=9.5708+1.1131∗ln(time)+ϵ
+
+After running the Parks Test the p-value is 4.557e-13 which is statically significant. Thus rejecting the null hypothesis at all reasonable significance levels and concluding that there is sufficient evidence of Heteroscedasticity in the data, which is consistent with what we observed in ‘y vs x’ and ‘residuals vs fitted’ plots.
+
+Transforming the sales to log(sales)
+```{r}
+log_sales <- log(sales)
+
+# Fitting a regression model over log sales vs time
+loglin_model <- lm(log_sales ~ time)
+summary(loglin_model)
+```
+Interpretation:
+The Regression Equation is : ln(sales)=8.7390327+0.0053746∗time+e
+
+Intercept Coefficient's Interpretation (beta_0): The intercept coefficient's estimate is 8.7390327 which indicates the log of sales when time is zero that does not make logical sense.
+
+The coefficient for Time's Interpretation (β1): The time coefficient 's estimate is 0.0053746 which  means that with 1 unit increase in time thus increases the log of sales by 0.0053746 units.
+
+R-square, Adj. R-square and Standard Error
+The value of R^2 after running the multiple regression is 0.6873 which  means that productivity is capable to explain 68.73% of the variation in the data and the rest 31.27% of the variation remains unexplained. The value of adjusted R2 after running the multiple regression is 0.6861. The standard error by running the model is 0.2784 on 263 degrees of freedom.
+
+Global F-test/ Individual t-test(To check tha validity and linearity of the model)
+Hypothesis:
+H0:beta_1=0
+H1:beta_1≠0
+
+After  running the Global F-test the p-value is 2.2e−1 which is statically significant. Thus rejecting the null hypothesis at all reasonable significance level and concluding the overall model is valid and there exists a linear relationship between time and sales.
+
+
+```{r}
+preds_loglin <- fitted(loglin_model)
+residual_loglin <- residuals(loglin_model)
+residual_loglin_sq <- residual_loglin^2
+
+##Informal Methods
+##Plotting the residuals vs fitted graph
+plot(x = preds_loglin,
+     y = residual_loglin_sq)
+##Based on the scatterplot, we can observe that the scatterplot no longer shows the FAN pattern and the variance seems constant
+##Formal Methods
+##Spearman Rank Correlation Method
+##Hypothesis
+##H0: No evidence of Heteroscedasticity
+##H1: Evidence of Heteroscedasticity is present.
+
+abs_residuals <- abs(residual_loglin)
+
+spearman_test <- cor.test(x = time,
+                          y = abs_residuals,
+                          alternative = "greater",
+                          method = "spearman", 
+                          exact = FALSE)
+spearman_test
+```
+
+After  running the Spearman Rank correlation test the p-value is 0.001368 which is statically significant. Thus rejecting the null hypothesis at all reasonable significance level and concluding that there is sufficient evidence of Heteroscedasticity in the data and conclude that log transformation didn’t reduce the variance significantly.
+Predicting the value at t=300
+```{r}
+pred <- predict(loglin_model, data.frame(time = 300))
+pred <- exp(pred)
+pred
+##The forecast for time t=300 is 31,301.4
+```
+```{r}
+##Question 8
+##Reading the data
+Ques8 <- read.csv("Woody.csv")
+##Plotting the scatterplot
+plot(Ques8[,2:5])
+
+##Fitting the base regression model
+y <- Ques8$Y
+n <- Ques8$N
+p <- Ques8$P
+i <- Ques8$I
+
+Ques8_model <- lm(y ~ n + p + i)
+summary(Ques8_model)
+```
+The Regression Equation Is: y=1.022e05−9.075e03∗n+0.3547∗p+1.288∗i+e 
+
+Intercept Coefficient's Interpretation (beta_0): The intercept's estimate is 1.22e+05 which indicates the number of customer served when n, p & i are zero that does not make any logical sense.
+
+The Coefficient for n's Interpretation (beta_1): The coefficient for n's estimate is -9.075e+03 which indicates that for every unit increase in n reduces the customers served by 9075, by keeping p and i constant.
+
+The Coefficient for p 's Interpretation(beta_2): The coefficient for p's estimate  is 0.3547 whichindicates that for every 1 unit increase in the number of person staying in a 3 mile radius, the customer serves increases by 0.3547 units, by keeping n and i constant.
+
+The Coefficient of i's Interpretation (beta3): The coefficient for i's estimate is 1.288 which indicates that for every 1 unit increase in the average household income of people, the number of customers served increases by 1.288 units, by keeping p and n constant
+
+R-square, Adj. R-square and Standard Error
+The value of R^2 after running the multiple regression is 0.6182 which means that n, p and i are capable to explain 61.82% of the variation in the data and the rest 39.18% of the variation remains unexplained. The value of adjusted R2 value after running the multiple regression is 0.5787. The standard error by running the model is 14540 over 29 degrees of freedom.
+
+Global F-test(To check the validity and linearity of the model)
+Hypothesis:
+H0:beta_1=beta_2=beta_3=0
+H1:Atleast one beta_i ≠0
+
+After running the Global F-test the p-value is 3.058e−06 which is statically significant. Thus rejecting the null hypothesis at all reasonable significance levels and concluding that overall model is valid.
+
+Individual t-test
+n
+H0:beta_1=0
+H1:beta_1≠0
+
+After running the individual t-test the p-value is 0.000126 which is statically significant.Thus rejecting the null hypothesis at 0.05 significance level and concluding that n is linearly related with y.
+
+p
+H0:beta_2=0
+H1:beta_2≠0
+
+After running the individual t-test the p-value is 3.54e-05 which is statically significant. Thus rejecting the null hypothesis at any reasonable significance level and concluding that p is linearly related with transfer time
+
+i
+H0:beta_2=0
+H1:beta_2≠0
+
+After running the individual t-test the p-value is 0.024623 which is statically significant. hus rejecting the null hypothesis at 0.05 significance level and concluding that i is linearly related with transfer time
+
+Part A: Running the Breusch-Pagan test
+Hypothesis:
+H0:alpha_1=alpha_2=alpha_3=0
+H1:Atleast 1 alpha_i ≠0
+```{r}
+# Calculating the residuals
+woody_residuals <- residuals(Ques8_model)
+residual_sq <- woody_residuals^2
+
+# Fitting the auxiliary regression on squared residuals against independent variables
+aux_model <- lm(residual_sq ~ n + p + i)
+summary(aux_model)
+
+# Calculating the test statistic
+chi_sq_val <- nrow(Ques8)*summary(aux_model)$r.squared
+chi_sq_val
+
+# Calculating the critical chi squared value
+chi_sq_critical <- qchisq(0.95, 3)
+chi_sq_critical
+
+##The test statistic on running the chi square value is less than the critical value. Hence we can reject the null ##hypothesis at 0.05 significance level and conclude that there is no evidence of Heteroscedasticity in the data
+
+##Part B: Running the Breush-Pagan Test using the package lmtest
+lmtest::bptest(residual_sq ~ n + p + i)
+
+##The p-value on running the Breush-Pagan test using the lmtest package is 0.6185. Hence we fail to reject the null ##hypothesis at all reasonable significant levels and conclude that there is no evidence of Heteroscedasticity in the ##data
+```
+Part C: White’s General Heteroscedasticity Test
+Hypothesis:
+H0: There is no evidence of Heteroscedasticity
+H1: There is evidence of Heteroscedasticity
+```{r}
+whites_test <- lm(residual_sq ~ n + p + i + I(n^2) + I(p^2) + I(i^2) + I(n*p) + I(p*i) + I(n*i))
+summary(whites_test)
+# Calculating the chi-square value
+chi_sq_val <- nrow(Ques8)*summary(whites_test)$r.squared
+chi_sq_val
+# Calculating the critical chi-square value
+chi_sq_critical <- qchisq(0.95, 9)
+chi_sq_critical
+# Calculating the p-value corresponding to the chi-sq value
+pchisq(chi_sq_val, 9, lower.tail = FALSE)
+```
+
+The p-value of the White’s General Test is 0.0439. Hence, we can reject the null Hypothesis at 0.05 significance level and conclude that there is presence of hetereoscedasticity in the data. This is in contrast to what we obtained in Parts A and Part B before.
+
+Part D: Koenkar-Bassett Test
+Hypothesis:
+H0: There is no evidence of Heteroscedasticity
+H1: There is evidence of Heteroscedasticity
+
+```{r}
+pred_woody <- fitted(Ques8_model)
+fitted_sq <- pred_woody^2
+
+koenkar_bassett <- lm(residual_sq ~ fitted_sq)
+summary(koenkar_bassett)
+
+##The p-value of running Koenkar-Bassett test is 0.3448. Hence, we fail to reject the null hypothesis and conclude ##that there is no Heteroscedasticity in the data. And it is consistent with the results obtained from parts a,b and c
+
+```
+
+##Question 9
+##Part A
+```{r}
+library(dplyr)
+
+Economist <- read.csv('EconomistSalary.csv') 
+
+Economist_updated <- Economist %>% mutate(Age_mid = c(22,27,32,37,42,47,52,57,62,67,72))
+
+Med_salary <- as.numeric(gsub(',','',Economist_updated$Median.salary....))
+age_mid <- Economist_updated$Age_mid
+
+scatter.smooth(age_mid,Med_salary)
+```
+
+```{r}
+age_mid_sq <- age_mid^2
+
+Econ1 <- lm(Med_salary ~ age_mid )
+summary(Econ1)
+ 
+# Quadratic
+Econ_reg <- lm(Med_salary ~ age_mid + age_mid_sq)
+summary(Econ_reg)
+
+print(paste('We observe that the adjusted R-square for the Quadratic model is better as compared to the linear model and hence we select that'))
+print(paste('The p-value of the F-statistic is statistically significant and hence the model is valid. The R-square is 0.9303 and hence the independent variables explain 93.03 percent variation in the salary while the other is unexplained. The adjusted R-square is 0.9129.'))
+
+resid_econ <- residuals(Econ_reg)
+resid_econ_sq <- resid_econ^2
+```
+
+```{r}
+## Case 1 
+age_mid_sqrt <- sqrt(age_mid)
+Med_salary1 <- Med_salary / sqrt(age_mid)
+age_mid_rec1 <- 1/sqrt(age_mid)
+age_mid_rec2 <- age_mid_sq/age_mid_sqrt
+
+trans1 <- lm(Med_salary1 ~ 0 + age_mid_rec1 + age_mid_sqrt + age_mid_rec2)
+summary(trans1)
+
+resids_tran_sq <- (residuals(trans1))^2
+resids_trans1 <- residuals(trans1)
+pred_trans_sq <- predict(trans1)^2
+
+aux1 <- lm(resids_tran_sq ~ pred_trans_sq)
+summary(aux1)
+```
+
+```{r}
+##Part c
+## Case 2
+
+Med_salary2 <- Med_salary / age_mid
+age_mid_rec2 <- 1/age_mid
+
+trans2 <- lm(Med_salary2 ~  age_mid_rec2 + 1 + age_mid)
+summary(trans2)
+
+resids_sq_trans1 <- (residuals(trans1))^2
+resids_sq_trans2 <- (residuals(trans2))^2
+resids_trans2 <- residuals(trans2)
+```
+
+Part d
+Hypothesis for Park′s Test
+H0: β2 =0 (no heteroscedasticity)
+H1: β2 ≠0 (There is heteroscedasticity)
+
+
+
+```{r}
+plot(predict(trans1),resids_sq_trans1)
+
+plot(predict(trans2),resids_sq_trans2)
+
+print(paste('The plots do not show heteroscedasticity'))
+
+## Park test trans2
+
+park_test_trans2 <- lm(log(resids_sq_trans2) ~ log(age_mid_rec2))
+summary(park_test_trans2)
+
+print(paste('The beta estimate p-value is not statistically significant and hence we fail to reject the null hypothesis and conclude that it is homoscedastic'))
+
+park_test_trans22 <- lm(log(resids_sq_trans2) ~ log(age_mid))
+summary(park_test_trans2)
+ 
+print(paste('The beta estimate p-value is not statistically significant and hence we fail to reject the null hypothesis and conclude that it is homoscedastic'))
+
+## Park test trans1
+
+park_test_trans1 <- lm(log(resids_tran_sq) ~ log(age_mid_rec1))
+summary(park_test_trans1)
+
+print(paste('The beta estimate p-value is not statsitically significant and hence we fail to reject the null hypothesis and conclude that it is homoscedastic'))
+
+
+park_test_trans11 <- lm(log(resids_tran_sq) ~ log(age_mid_sqrt))
+summary(park_test_trans11)
+
+print(paste('The beta estimate p-value is not statsitically significant and hence we fail to reject the null hypothesis and conclude that it is homoscedastic'))
+
+park_test_trans12 <- lm(log(resids_tran_sq) ~ log(age_mid_rec2))
+summary(park_test_trans12)
+
+print(paste('The beta estimate p-value is not statsitically significant and hence we fail to reject the null hypothesis and conclude that it is homoscedastic'))
+
+print(paste('Thus we conclude that there is no evidence of hetereoscedasticity in data after transformation'))
+
+print(paste('Thus we conclude that there is no evidence of hetereoscedasticity in data after transformation'))
+
+```
+
+
+##Question 10
+##Reading the data
+
+```{r}
+skidata <- read.csv("SkiSales.csv")
+head(skidata)
+##Fitting the multiple regression model
+tickets <- skidata$Tickets
+snowfall <- skidata$Snowfall
+temperature <- skidata$Temperature
+time <- 1:nrow(skidata)
+
+linear_model <- lm(tickets ~ snowfall + temperature)
+summary(linear_model)
+residuals_ski <- residuals(linear_model)
+preds_ski <- fitted(linear_model)
+##Test for Normality
+##Informal Test
+plot(x = preds_ski,
+     y = residuals_ski)
+```
+Based on the scatterplot, there is no apparent pattern in the graph of residual vs fitted. Hence we can conclude that the data satisfies the normality assumption
+
+Formal Test
+Hypothesis:
+H0: The distribution is normally distributed
+H1: the distribution is not normally distributed
+
+
+```{r}
+norm_test <- nortest::ad.test(residuals_ski)
+norm_test
+```
+The p-value of running the anderson darling test of normality is 0.6929. Hence we fail to reject the null hypothesis at all reasonable significance levels and conclude that the underlying data is normal
+Test for independence
+Informal Test
+
+```{r}
+plot(x = time,
+     y = residuals_ski,
+     main = "Informal Test of Independence",
+     xlab = "Time",
+     ylab = "Residuals",
+     type="b")
+```
+Based on the graph we can observe signs of positive serial correlation existing in the data and the residuals are not randomly distributed
+
+Formal Test
+Hypothesis:
+H0:ρ=0
+H1:ρ>0
+
+```{r }
+dw_test <- lmtest::dwtest(linear_model,
+                          alternative = "two.sided")
+dw_test
+
+```
+The p-value on running the Durban Watson test for autocorrelation is 0.0003812. Hence we can reject the null hypothesis at any reasonable significance level and conclude that there is first order positive autocorrelation in the data.
+Test for constant variance
+Informal Method
+
+```{r}
+residuals_ski_sq <- residuals_ski^2
+
+plot(x = preds_ski,
+     y = residuals_ski_sq,
+     main = "Residual square vs fitted values",
+     xlab = "Fitted values",
+     ylab = "Residual square")
+
+```
+
+There is no apparent pattern in the residuals square vs fitted graph. Hence we can infer that the variances are constant in the data
+
+Formal Method: Using White’s General Test
+Hypothesis:
+H0: There is no evidence of hetereoscedasticity
+H1: There is evidence of hetereoscedasticity
+
+
+```{r }
+whites_test <- lm(residuals_ski_sq ~ snowfall + temperature + I(snowfall^2) + I(temperature^2) + I(snowfall*temperature))
+summary(whites_test)
+
+# Calculating the chi-square value
+chi_sq_val <- nrow(skidata)*summary(whites_test)$r.squared
+chi_sq_val
+
+# Calculating the critical chi-square value
+chi_sq_critical <- qchisq(0.95, 5)
+chi_sq_critical
+
+# Calculating the p-value corresponding to the chi-sq value
+pchisq(chi_sq_val, 5, lower.tail = FALSE)
+
+```
+
+The p-value of running the White’s General Test is 0.5454697. Hence we fail to reject the null hypothesis at all reasonable significance level and conclude that there is no presence of heteroscedasticity in the data
+
+Thus we can conclude that the multiple regression satisfies the condition of normality and homoscedasticity but it does not satisfy the condition of independence (autocorrelation)
+
+Adding the time component to the regression
+
+```{r }
+linear_model <- lm(tickets ~ snowfall + temperature + time)
+summary(linear_model)
+
+residuals_ski <- residuals(linear_model)
+preds_ski <- fitted(linear_model)
+
+##Test for Normality
+##Informal Test
+plot(x = preds_ski,
+     y = residuals_ski,
+     main = "Residuals vs Fit plot",
+     xlab = "Fitted Values",
+     ylab = "Residuals")
+```
+
+Based on the scatterplot, there is no apparent pattern in the graph of residual vs fitted. Hence we can conclude that the data satisfies the normality assumption
+
+Formal Test
+Hypothesis:
+H0: The distribution is normally distributed
+H1: the distribution is not normally distributed
+
+```{r}
+norm_test <- nortest::ad.test(residuals_ski)
+norm_test
+```
+The p-value of running the anderson darling test of normality is 0.5268. Hence we fail to reject the null hypothesis at all reasonable significance levels and conclude that the underlying data is normal
+
+Test for independence
+Informal Test
+
+```{r }
+plot(x = time,
+     y = residuals_ski,
+     main = "Informal Test of Independence",
+     xlab = "Time",
+     ylab = "Residuals",
+     type="b")
+```
+
+Based on the graph we can observe no signs of serial correlation existing in the data and the residuals are randomly distributed
+
+Formal Test
+Hypothesis:
+H0:ρ=0
+H1:ρ>0
+
+```{r }
+dw_test <- lmtest::dwtest(linear_model,
+                          alternative = "two.sided")
+dw_test
+```
+
+The p-value on running the Durban Watson test for autocorrelation is 0.7024. Hence we fail to reject the null hypothesis at any reasonable significance level and conclude that there is no first order autocorrelation in the data.
+
+Test for constant variance
+Informal Method
+```{r }
+residuals_ski_sq <- residuals_ski^2
+
+plot(x = preds_ski,
+     y = residuals_ski_sq,
+     main = "Residual square vs fitted values",
+     xlab = "Fitted values",
+     ylab = "Residual square")
+```
+
+There is no apparent pattern in the residuals square vs fitted graph. Hence we can infer that the variances are constant in the data
+
+Formal Method: Using White’s General Test
+Hypothesis:
+H0: There is no evidence of hetereoscedasticity
+H1: There is evidence of hetereoscedasticity
+```{r}
+whites_test <- lm(residuals_ski_sq ~ snowfall + temperature + time + I(snowfall^2) + I(temperature^2) + I(time^2) + I(snowfall*temperature) + I(snowfall*time) + I(temperature*time))
+summary(whites_test)
+
+# Calculating the chi-square value
+chi_sq_val <- nrow(skidata)*summary(whites_test)$r.squared
+chi_sq_val
+
+# Calculating the critical chi-square value
+chi_sq_critical <- qchisq(0.95, 9)
+chi_sq_critical
+
+# Calculating the p-value corresponding to the chi-sq value
+pchisq(chi_sq_val, 9, lower.tail = FALSE)
+
+```
+
+The p-value of running the White’s General Test is 0.5212269. Hence we fail to reject the null hypothesis at all reasonable significance level and conclude that there is no presence of heteroscedasticity in the data
+
+Thus we can conclude that after introducing the time component to the over all model, we remedied the variation caused by autocorrelation. The overall model with Time estimator satisfies all three conditions of running a multiplt linear regression
+
+###Question 11
+
+```{r}
+
+##Reading the data
+compensation <- read.csv("CompensationAndProductivity.csv")
+
+
+##Part A
+##Plotting the scatterplot
+X <- compensation$X
+Y <- compensation$Y
+
+##Fitting the regression model
+linear_model <- lm(Y ~ X)
+summary(linear_model)
+
+residuals_comp <- residuals(linear_model)
+pred_comp <- fitted(linear_model)
+
+
+##Checking for autocorrelation
+##Informal Test: Residual vs time
+time <- 1:nrow(compensation)
+
+plot(x = time,
+     y = residuals_comp,
+     main = "Residuals against time",
+     xlab = "Time",
+     ylab = "Residuals",
+     type="b")
+```
+
+Formal Test: Durban Watson Test
+Hypothesis:
+H0:ρ=0
+H1:ρ≠0
+
+
+```{r }
+dw_test <- lmtest::dwtest(linear_model,
+                          alternative = "two.sided")
+dw_test
+
+##The p-value of running the Durban Watson test is 2.2e-16. Hence we can reject the null hypothesis at all ##reasonable significance level and conclude the presence of autocorrelation in the data.
+
+##Adding the time variable as a regressor
+linear_model_time <- lm(Y ~ X + time)
+summary(linear_model_time)
+
+residuals_comp <- residuals(linear_model_time)
+pred_comp <- fitted(linear_model_time)
+
+##Checking for autocorrelation
+##Informal Test: Residual vs time
+time <- 1:nrow(compensation)
+
+plot(x = time,
+     y = residuals_comp,
+     main = "Residuals against time",
+     xlab = "Time",
+     ylab = "Residuals",
+     type="b")
+```
+
+Formal Test: Durban Watson Test
+Hypothesis:
+H0:ρ=0
+H1:ρ≠0
+
+```{r }
+dw_test <- lmtest::dwtest(linear_model_time,
+                          alternative = "two.sided")
+dw_test
+```
+
+The p-value of running the Durban Watson test is 2.2e-16. Hence we can reject the null hypothesis at all reasonable significance level and conclude the presence of autocorrelation in the data
+
+The coefficient of time is not significant in the new model. There is no effect of adding time as a independent variable and there is still significant effect of autocorrelation in the data that cannot be explained by time
+```{r }
+library(dplyr)
+##Part B
+compensation_lag <- compensation %>% mutate(lag_y = lag(compensation$Y))
+compensation_lag <- compensation_lag[2:nrow(compensation_lag),]
+head(compensation_lag)
+
+lag_Y <- compensation_lag$lag_y
+X <- compensation_lag$X
+Y <- compensation_lag$Y
+
+carryover_model <- lm(Y ~ X + lag_Y)
+summary(carryover_model)
+```
+
+
+Regression Equation
+Yt=9.09987+0.16698∗Xt+0.75173∗Yt−1+ϵ
+
+Interpretation of the Intercept Coefficient (β1): The estimate of the intercept is 9.09987. This indicates the index of real compensation per hour at time t when index of output per hour at time t and the index of real compensation per hour at time t-1 is 0. This does not make sense.
+
+Interpretation of the Coefficient for X (β2): The estimate of the coefficient for X is 0.16698. This indicates that for every unit increase in X increases the index of compensation by 0.16698, keeping Yt−1 constant.
+
+Interpretation of the Coefficient for Yt−1 (β3): The estimate of the coefficient for Yt−1 is 0.75173
+
+R-square, Adj. R-square and Standard Error
+The R2 value on running the multiple regression is 0.9953. This means that X and Yt−1 are able to explain 99.53% of the variation in the data and 0.47% of the variation remains unexplained. The adjusted R2 value on running the multiple regression is 0.9951. The standard error of running the model is 1.041 over 42 degrees of freedom.
+
+Global F-test
+Hypothesis:
+H0:β2=β3=0
+H1:Atleast one βi ≠0
+
+The p-value of running the Global F-test is 2.2e−16. Hence we reject the null hypothesis at all reasonable significance levels and conclude that overall model is valid.
+
+Individual t-test
+X
+H0:β1=0
+H1:β1≠0
+
+The p-value of running the individual t-test is 0.000106. Hence, we reject the null hypothesis at any reasonable significance level and conclude that X is linearly related with Y.
+
+Yt−1
+H0:β2=0
+H1:β2≠0
+
+The p-value of running the individual t-test is 3.32e-16. Hence, we reject the null hypothesis at any reasonable significance level and conclude that Yt−1 is linearly related with transfer time.
+
+
+```{r }
+##Part C
+var_b3 <- 0.05826^2
+var_b3
+n <- nrow(compensation_lag)
+n
+
+dw_test <- lmtest::dwtest(carryover_model)
+d_statistic <- dw_test$statistic
+
+p_hat <- 1 - d_statistic/2
+p_hat
+
+h_statistic <- abs(p_hat*sqrt(n/(1-n*var_b3)))
+h_statistic
+```
+The h statistic value is 2.27 which is more than 1.96. Hence we can under the assumption of 45 being a large enough sample size conclude that there is a presence of autocorrelation in the auto regressive wage discrimination as well
+We obtain similar results both here as well as in Part A. Hence we infer that the both models have presence of autocorrelation with them.
