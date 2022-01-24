@@ -1,0 +1,480 @@
+---
+title: "Homework 5"
+output: html_document
+---
+
+#########################################
+### Question 1 - Variable Selection
+#########################################
+```{r}
+territory <- read.csv("TERRITORY.csv")
+
+## Defining the variables
+sales<- territory$SALES
+times <- territory$TIME
+potent <- territory$POTENT
+adv <- territory$ADV
+share <- territory$SHARE
+sharechg <- territory$SHARECHG
+accts <- territory$ACCTS
+workload <- territory$WORKLOAD
+rating <- territory$RATING
+
+### First run a regression model with all variables for a quick check 
+### for multicollinearity
+model_5 <- lm(sales ~ times + potent + adv + share + sharechg + accts + workload + rating)
+
+car::vif(model_5) ### No evidence of multicollinearity considereing wrt to the VIF which had a threshhold of 10
+library(olsrr)
+### Run Best Subset Technique
+best_subset <- olsrr::ols_step_best_subset(model_5, details = TRUE)
+best_subset
+
+```
+
+## As seen from the value of Best Subsets adjusted R^2 value the best models to consider are 4,5 and 6 variable models. 
+
+## The models with variables 5 and 6 have a Cp value that is lower than p+1. Thus implying that the model has no bias. ## The variable accounts in considered in the model as the sales can be dependent on the number of accounts a sales ##person has. Thereby, the model with 6 variables is considered besides the principle of parsimony suggesting the 
+## opposite.
+
+## To determine the best model among the model with 4 and 6 variables, we run a partial F-test
+
+## Hypothesis:
+## H0: No significant difference between the reduced and full model. Thus, choose reduce model.
+## H1: Significant difference between the reduced and full model. Thus, choose the full model
+```{r}
+full_model <- lm(sales ~ times + potent + adv + share + sharechg + accts)
+reduced_model <- lm(sales ~ potent + adv + share + accts)
+
+anova(reduced_model, full_model)
+```
+
+## After running the partial F-test the p-value is 0.135. Thus we fail to reject the null hypothesis at a significance ## level of 0.05.  To  conclude that the full model and the reduced model do not differ significantly and so we should ## choose the reduced model
+
+## The final model using Best Subset Regression is SALES∼POTENT+ADV+SHARE+ACCTS
+
+## Running Stepwise Regression
+```{r}
+full_model <- lm(sales ~ times + potent + adv + share + sharechg + accts + workload + rating)
+stepwise_regression <- ols_step_both_p(full_model, prem = 0.10, pent = 0.05, details = TRUE)
+plot(stepwise_regression)
+```
+##The final model using stepwise regression is SALES∼POTENT+ADV+SHARE+ACCTS
+
+## The variables to consider are same by running both stepwise regression and best subset regression
+
+## Regression Diagnostics
+## Testing for Linearity
+
+```{r}
+df <- data.frame(sales, potent, adv, share, accts)
+plot(df)
+```
+## As seen from the scatter plot,it can be concluded that the variables show linear relationship with the dependent variable
+
+## Test for Heteroscedasticity
+```{r}
+model_final <- lm(sales ~ potent + adv + share + accts)
+
+residual <- residuals(model_final)
+fitted_final <- predict(model_final)
+
+plot(fitted_final, residual)
+```
+## Based on the scatter plot, we can conclude that there is no presence of heteroscedasticity in the data
+
+## Test for normality
+## Hypothesis
+## H0: Normally distributed Distribution
+## H1: Not Normally Distributed Distribution
+
+```{r}
+nortest::ad.test(residual)
+```
+
+## After running the anderson darling test the p-value is 0.9862.Thus we fail to reject the null hypothesis at all
+## reasonable significance levels and conclude that the data is normal
+
+## Model building and validation
+## Hypothesis
+## H0:β1=β2=β3=β4=0
+## H1:Atleast 1 βi≠0
+
+```{r}
+modeli_final <- lm(sales ~ potent + adv + share + accts)
+summary(model_final)
+```
+## The final regression equation is y=−1442+0.03822x2+0.175x3+190.1x4+9.214x6+ϵ
+
+## y:SALES
+## x2:POTENT
+## x3:ADV
+## x4:SHARE
+## x6:ACCTS
+
+## After running the Global F-test the p-value is 9.563e-10. Thus we can reject the null hypothesis at all reasonable ## significant level and conclude that the overall model is valid. The R2 value of the model is 0.9004.Indicating ##that the model is cabpale of explaining the 90.04% variance in the data. The adjusted R2 is 0.8805. The Standard ##Error of the model is 453.8 on 20 degrees of freedom.
+
+## Interpreting the Coefficients
+## Intercept (β0): The estimate of the intercept coefficient is -1442 which indicates that when all the other ##variables are zero, -1442 units are sold. That does not make any sense.
+
+## Potent (β1): The estimate of coefficient of potent is 0.03822 which indicates that 1 unit increase in unit sales ##in territory increases the unit sales by 0.03822, while keeping all the other variables constant.
+
+## Adv (β2): The estimate of coefficient of potent is 0.175 which indicates that 1 unit increase in dollar spend on ##advertisement increases the unit sales by 0.175, while keeping all the other variables constant.
+
+## Share (β3): The estimate of coefficient of share is 190.1 which indicates that 1 unit increase in weighted average ##of market share increases the unit sales by 190.1, while keeping all the other variables constant.
+
+## Accts (β4): The estimate of coefficient of share is 9.2416 which indicates that 1 unit increase in the number of ##accounts assigned to sales people increases the unit sales by 9.24, while keeping all the other variables constant.
+
+## Individual t-test
+## Potent
+## H0:β1=0
+## H1:β1≠0
+
+##After of running the individual t-test the p-value is 0.000111. Thus rejecting the null hypothesis at 0.05 ##significance level and conclude that potent is linearly related with unit sales.
+
+## Adv
+## H0:β2=0
+## H1:β2≠0
+
+## The p-value of running the individual t-test is 0.000125. Thus rejecting the null hypothesis at 0.05
+## significance level and conclude that adv is linearly related with unit sales.
+
+## Share
+## H0:β3=0
+## H1:β3≠0
+
+## The p-value of running the individual t-test is 0.001065. Thus, rejecting the null hypothesis at 0.05 significance ## level and conclude that weighted average market share is linearly related with unit sales.
+
+## Accts
+## H0:β4=0
+## H1:β4≠0
+
+## The p-value of running the individual t-test is 0.004337.Thus rejecting the null hypothesis at 0.05
+## significance level and conclude that number of accounts assigned to salespeople is linearly related with unit 
+## sales.
+
+
+
+#########################################
+### Question 2 - MWD Test
+#########################################
+
+## Reading the data
+
+```{r}
+manufacturing <- read.csv("MANUFACTURING.csv")
+data <- manufacturing[6:nrow(manufacturing),]
+colnames(data) <- c(manufacturing[4,1:4],"Output","Labor_Input","Capital_Input")
+
+data$Year = as.numeric(data$Year)
+data$Output = as.numeric(gsub(',','',data$Output))
+data$Labor_Input = as.numeric(gsub(',','',data$Labor_Input))
+data$Capital_Input = as.numeric(gsub(',','',data$Capital_Input))
+```
+## Part A: Running a standard linear model
+```{r}
+output <- na.omit(data$Output)
+labor <- na.omit(data$Labor_Input)
+capital <- na.omit(data$Capital_Input)
+
+linear_model <- lm(output ~ labor + capital)
+summary(linear_model)
+```
+
+## The final regression equation is Output=2.336e+05+4.799∗Labor+9.952∗Capital+ϵ
+
+## After running the Global F-test the p-value is 2.2e-16. Thus rejecting the null hypothesis at all reasonable ##significant level and conclude that the overall model is valid. The R2 value of the model is 0.9811 which indicates ##that the model is capable of explaining 98.11%variance in the data. The adjusted R2 is 0.9803. The Standard Error ##of the model is 6301000 on 48 degrees of freedom
+
+## Interpreting the Coefficients
+## Intercept (β0): The estimate of the intercept coefficient is 2.336e+05 whichs indicates that when every other ##variable is zero, 2.336e+05 is the output.
+
+## Labor Input (β1): The estimate of coefficient of Labor Input is 4.799 which indicates that 1 unit increase in ##labor unit the output increases by 4799 dollars, keeping the other variables constant
+
+## Capital Input (β2): The estimate of coefficient of Capital Input is 9.952 which indicates that increasing the ##capital input by 1000 dollars increases the output 9952 dollars, keeping the other variables constant
+
+## Individual t-test
+## Labor Input
+## H0:β1=0
+## H1:β1≠0
+
+## After running the individual t-test the p-value is 1.50e-08. Thus rejecting the null hypothesis at 0.05 ##significance level and conclude that Labor Input is linearly related with output.
+ 
+## Capital Input
+## H0:β2=0
+## H1:β2≠0
+
+## After running the individual t-test the p-value is 1.43e-13.Thus rejecting the null hypothesis at 0.05 significance level ##and conclude that Capital Input is linearly related with output.
+
+## Part B: Running a Log linear model
+```{r}
+log_output <- log(output)
+log_labor <- log(labor)
+log_capital <- log(capital)
+
+loglinear_model <- lm(log_output ~ log_labor + log_capital)
+summary(loglinear_model)
+```
+## The final regression equation is ln(Output)=3.8876+0.46833∗ln(Labor)+0.52128∗ln(Capital)+ϵ
+
+##After running the Global F-test the p-val is 2.2e-16. THus rejecting the null hypothesis at all reasonable ##significant level and conclude that the overall model is valid. The R2 value of the model is 0.9642 which indicates ##that the model is capable in explaining 96.42% the variance in the data. The adjusted R2 is 0.9627. The Standard ##Error of the model is 0.2668 on 48 degrees of freedom
+
+##Interpreting the Coefficients
+##Intercept (β0): The estimate of the intercept coefficient is 0.2668 which indicates that when log of other variable ##is zero, 0.2668 is the output.
+
+##Labor Input (β1): The estimate of coefficient of Labor Input is 0.46833 which indicates that 1 percent increase in ##labor unit the output increases by 0.47 percent, keeping the other variables constant.
+
+##Capital Input (β2): The estimate of coefficient of Capital Input is 0.52128 which indicates that increasing the ##capital input by 1 percent increases the output by 0.52 percent, keeping the other variables constant.
+
+##Individual t-test
+##Log Labor Input
+##H0:β1=0
+##H1:β1≠0
+
+##The p-value of running the individual t-test is 1.98e-05.Thus rejecting the null hypothesis at 0.05 significance ##level and conclude that Log Labor Input is linearly related with output.
+
+##Log Capital Input
+##H0:β2=0
+##H1:β2≠0
+
+##The p-value of running the individual t-test is 2.18e-06.Thus rejecting the null hypothesis at 0.05 significance ##level and conclude that Log Capital Input is linearly related with output.
+
+##Part C: Running MWD Test
+
+```{r}
+# Getting the predictions
+linear_pred <- predict(linear_model)
+loglinear_pred <- predict(loglinear_model)
+
+# Getting the difference of log predictions and the linear predictions
+logpred_diff <- log(linear_pred) - loglinear_pred
+linearpred_diff <- exp(loglinear_pred) - linear_pred
+```
+
+## Hypothesis
+## H0: Linear Model: Y is a linear function of the X’s
+## H1: Log-Linear Model: ln(Y) is a linear function of the X’s or a log of X’s
+
+```{r}
+linear_specification_test <- lm(output ~ capital + labor + logpred_diff)
+summary(linear_specification_test)
+```
+
+##As the coefficient of logpred_diff is insignificant, thus fail to reject H0.
+
+```{r}
+log_specification_test <- lm(log_output ~ log_capital + log_labor + linearpred_diff)
+summary(log_specification_test)
+```
+
+##As the coefficient of logpred_diff is not significant, we fail to reject H1.
+## From the MWD Test we can conclude that either model is reasonable.
+
+##Excercise 3
+## Reading the data
+
+```{r}
+oecd <- read.csv("OECD.csv")
+data <- na.omit(oecd[6:28,])
+colnames(data) <- oecd[5,]
+
+library(dplyr)
+data <- data %>% mutate(X2_lag = lag(X2)) %>% mutate(X3_lag = lag(X3)) %>% mutate(Y_lag = lag(Y))
+
+year <- as.numeric(data$Year)
+Y <- as.numeric(data$Y)
+X2 <- as.numeric(data$X2)
+X3 <- as.numeric(data$X3)
+
+```
+
+## Part A
+## Model A
+
+```{r}
+model_a <- lm(log(Y) ~ log(X2) + log(X3))
+summary(model_a)
+```
+## The final regression equation is ln(Y)=1.55358+0.99758ln(X2)−0.33278ln(X3)+ϵ
+
+## After running the Global F-test the p-value is 2.2e-16. Thus rejecting the null hypothesis at all reasonable ##significant level and concluding that the overall model is valid. The R2 value of the model is 0.9942 which ##indicates that the model is capable in explaining 99.42% variance in the data. The adjusted R2 is 0.9936. The ##Standard Error of the model is 0.01787 on 20 degrees of freedom
+
+##Model A: Interpreting the Coefficients
+##Intercept (β0): The estimate of the intercept coefficient is 1.55358 which indicates that when log of other ##variable is zero, 1.55358 is the output. That does not make any sense.
+
+##X2 (β1): The estimate of coefficient of X2 (GDP) is 0.99758 which indicates that 1 percent increase in X2 results ##in increase in Y by 0.99758 percent, keeping the other variables constant.
+
+##X3 (β2): The estimate of coefficient of X3 (Real Energy Price) is -0.33278 which indicates that increasing the X3 ##by 1 percent decreases y by 0.33 percent, keeping the other variables constant.
+
+##Model A: Individual t-test
+##X2
+##H0:β1=0
+##H1:β1≠0
+
+##After running the individual t-test the p-value is < 2e-16. Thus rejecting the null hypothesis at 0.05 significance ##level and ##conclude that x2 is linearly related with y.
+
+##X3
+##H0:β2=0
+H1:β2≠0
+
+##After running the individual t-test the p-value is 1.12e-11. Hence, we reject the null hypothesis at 0.05 significance ##level and conclude that X3 is linearly related with y.
+
+
+
+```{r}
+data <- na.omit(data)
+Y <- as.numeric(data$Y)
+X2 <- as.numeric(data$X2)
+X3 <- as.numeric(data$X3)
+X2_lag <- as.numeric(data$X2_lag)
+X3_lag <- as.numeric(data$X3_lag)
+Y_lag <- as.numeric(data$Y_lag)
+```
+
+##Model B
+
+```{r}
+model_b <- lm(log(Y) ~ log(X2) + log(X2_lag) + log(X3))
+summary(model_b)
+```
+
+## The final regression equation is ln(Yt)=1.59316+0.83530ln(X2t)+0.17581ln(X2(t−1))−0.35259ln(X3t)+ϵ
+
+## After running the Global F-test is 2.2e-16.Thus rejecting the null hypothesis at all reasonable significant ##level and concluding that the overall model is valid. The R2 value of the model is 0.9942 which indicates that the ##model is able to explain 99.42% variance in the data. The adjusted R2 is 0.9936. The Standard Error of the 
+##model is 0.01728 on 18 degrees of freedom.
+
+##Model B: Interpreting the Coefficients
+##Intercept (β0): The estimate of the intercept coefficient is 1.59316 which indicates that when log of other variable is zero, 1.59316 is the output. That does not make any sense.
+
+##X2t (β1): The estimate of coefficient of X2t (GDP) is 0.83530 which indicates that 1 percent increase in X2t ##results in an increase in Y by 0.8353 percent,by keeping the other variables constant.
+
+##X3t (β2): The estimate of coefficient of X3 (Real Energy Price) is -0.3525 which indicates that increasing the X3t ##by 1 percent decreases y by 0.35 percent,by keeping the other variables constant.
+
+##Model B: Individual t-test
+##X2t
+##H0:β1=0
+##H1:β1≠0
+
+##After running the individual t-test the p-value is 0.00696. Hence, we reject the null hypothesis at 0.05 ##significance level and conclude that X2t is linearly related with Y
+
+##X2(t−1)
+##H0:β2=0
+##H1:β2≠0
+
+##After running the individual t-test the p-value is 0.52292. Hence, we fail to reject the null hypothesis at 0.05 ##significance level and conclude that X2(t−1) is not linearly related with Y.
+
+##X3t
+##H0:β3=0
+##H1:β3≠0
+
+##The p-value of running the individual t-test is 2.57e-10 thus rejecting the null hypothesis at 0.05 significance ##level and conclude that X3t is linearly related with Y.
+
+##Model C
+
+```{r}
+model_c <- lm(log(Y) ~ log(X2) + log(X3) + log(X3_lag))
+summary(model_c)
+```
+
+##The final regression equation is ln(Yt)=1.62947+1.00581ln(X2t)−0.23634ln(X3t)−0.12082ln(X3(t−1))+ϵ
+
+##After running the Global F-test the p-value is 2.2e-16. Thus rejecting the null hypothesis at all reasonable ##significant level and conclude that the overall model is valid. The R2 value of the model is 0.995. This indicates ##that the model is capable to explain 99.5% variance in the data. The adjusted R2 is 0.9942. The Standard Error of ##the model is 0.01592 on 18 degrees of freedom.
+
+##Model C: Interpreting the Coefficients
+##Intercept (β0): The estimate of the intercept coefficient is 1.62947 which indicates that when log of other ##variable is zero, 1.59316 is the output. That does not make any sense.
+
+##X2t (β1): The estimate of coefficient of X2t (GDP) is 1.0058 which indicates that 1 percent increase in X2t ##results in an increase in Yt by 1.00581 percent, keeping the other variables constant
+
+##X3t (β2): The estimate of coefficient of X3 (Real Energy Price) is -0.23634 which indicates that increasing the X3t ##by 1 percent decreases Yt by 0.23 percent, keeping the other variables constant.
+
+##Model C: Individual t-test
+##X2t
+##H0:β1=0
+##H1:β1≠0
+
+##After running the individual t-test the p-value is< 2e-16. Thus rejecting the null hypothesis at 0.05 significance ##level and conclude that X2t is linearly related with Y.
+
+##X3t
+##H0:β2=0
+##H1:β2≠0
+
+##After running the individual t-test the p-value is 0.000938. Thus rejecting the null hypothesis at 0.05 ##significance ##level and conclude that X3t is linearly related with Y.
+
+##X3(t−1)
+##H0:β3=0
+##H1:β3≠0
+
+##After running the individual t-test the p-value is 0.070789. Thus rejecting the null hypothesis at 0.05 ##significance level and conclude that X3(t−1) is linearly related with Y
+
+##Model D
+```{r}
+model_d <- lm(log(Y) ~ log(Y_lag) + log(X2) + log(X3))
+summary(model_d)
+```
+
+##The final regression equation is ln(Yt)=1.24899−0.33319 ln(Yt−1)+0.67133 ln(X2t)−0.27044 ln(X3t)+ϵ
+
+##After running the Global F-test is 2.2e-16. Thus rejecting the null hypothesis at all reasonable significant level ##and conclude that the overall model is valid. The R2 value of the model is 0.9964 which indicates that the model is ##able to explain 99.64% of the variance of the data. The adjusted R2 is 0.9958. The Standard Error of the model is ##0.01363 on 18 degrees of freedom.
+
+##Model D: Interpreting the Coefficients
+##Intercept (β0): The estimate of the intercept coefficient is 1.24899 which indicates that when log of other ##variable is zero, 1.24899 is the output. That does not make any sense.
+
+##Yt−1 (β1): The estimate of coefficient of Yt−1 is 0.33319 which indicates that 1 percent increase in the final ##aggregate demand of the current year results in an increase of 0.33319 percent in the final aggregate energy demand ##for the next year, by keeping the other variables constant
+
+##X2t (β2): The estimate of coefficient of X2t (GDP) is 0.67133 which indicates that 1 percent increase in X2t ##results in an increase in Yt by 0.67133 percent,by keeping the other variables constant.
+
+##X3t (β3): The estimate of coefficient of X3 (Real Energy Price) is -0.27044. This indicates that increasing the X3t ##by 1 percent decreases Yt by 0.27 percent, by keeping the other variables constant.
+
+##Model D: Individual t-test
+##Yt−1
+##H0:β1=0
+##H1:β1≠0
+
+##After running the individual t-test the p-valueis 0.00317. Thus rejecting the null hypothesis at 0.05 significance level and ##conclude that Yt−1 is linearly related with Y.
+
+##X2t
+##H0:β2=0
+##H1:β2≠0
+
+##After  running the individual t-test the p-value is 3.42e-06. Thus rejecting the null hypothesis at 0.05 significance ##level and conclude that X2t is linearly related with Y.
+
+##X3t
+##H0:β3=0
+##H1:β3≠0
+
+##After running the individual t-test the p-value is 2.05e-08. Hence, we reject the null hypothesis at 0.05 ##significance level and conclude that X3t is linearly related with Y.
+
+##Part B
+##In case of the true model being  either B, C or D and only model A is estimated then we will be making an Omitted ## Variable bias as we will fail to incorporate the lag terms in either X or Y present in the true models.
+
+##Part C
+##Model A
+##With 1% increase in X2 (GDP) results in increase in Y (aggregate final energy demand) by 0.998%, by keeping X3 ##(Real Energy Price) constant.
+
+##With 1% percent increase in X3 (Real Energy Price) results in decrease in Y (aggregate final energy demand) by 0.33%, by ##keeping X2 (GDP) constant.
+
+##Model B
+##With 1% increase in X2t (GDP) results in an increase in Y (aggregate final energy demand) by 0.835%, keeping X3t ##(Real Energy Price) constant.
+
+##With 1% increase in X3t (Real Energy Price) results in a decrease in Y (aggregate final energy demand) by 0.35%,
+## by keeping X2t (GDP) constant.
+
+## X2(t−1) is not statistically significant. Thus its coefficient is not interpreted.
+
+##Model C
+##With 1% increase in X2t (GDP) results in an increase in Y (aggregate final energy demand) by 1.006%, by keeping X3t ##(Real Energy Price) constant.
+
+## With 1% increase in X3t (Real Energy Price) results in a decrease in Y (aggregate final energy demand) by 0.236%, ## by keeping X2t (GDP) constant
+
+## X3(t−1) is not statistically significant. Hence we do not interpret its coefficient
+
+##Model D
+## With 1% increase in X2t (GDP), given a fixed Yt−1 results in an increase in Y (aggregate final energy demand) by ## 0.67%, by keeping X3t (Real Energy Price) constant
+
+##With 1% increase in X3t (Real Energy Price) , given a fixed Yt−1 results in a decrease in Y (aggregate final energy ## demand) by 0.27%, by keeping X2t (GDP) constant.
+
+## With 1% increase in Yt−1 (this year’s real energy demand), will result in an increase in next year’s Y (aggregate ## final energy demand) by 0.33%, keeping next year’s X2t (GDP) and X3t (Real Energy Price) constant.
+
+Part D
+##Using a lagged variable Y in the OLS estimation of Model D autocorrelation issues can be encountered. The demand ##function of the current year will be dependent on the demand function of the previous year which could violate the ##no serial correlation assumption of CLRM.
+
+

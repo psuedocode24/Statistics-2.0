@@ -1,52 +1,65 @@
-,Salary,Spending,Region
-Connecticut,60822,12436,Northeast or North Central
-Illinois,58246,9275,Northeast or North Central
-Indiana,47831,8935,Northeast or North Central
-Iowa,43130,7807,Northeast or North Central
-Kansas,43334,8373,Northeast or North Central
-Maine,41596,11285,Northeast or North Central
-Massachusetts,58624,12596,Northeast or North Central
-Michigan,54895,9880,Northeast or North Central
-Minnesota,49634,9675,Northeast or North Central
-Missouri,41839,7840,Northeast or North Central
-Nebraska,42044,7900,Northeast or North Central
-New Hampshire,46527,10206,Northeast or North Central
-New Jersey,59920,13781,Northeast or North Central
-New York,58537,13551,Northeast or North Central
-North Dakota,38822,7807,Northeast or North Central
-Ohio,51937,10034,Northeast or North Central
-Pennsylvania,54970,10711,Northeast or North Central
-Rhode Island,55956,11089,Northeast or North Central
-South Dakota,35378,7911,Northeast or North Central
-Vermont,48370,12475,Northeast or North Central
-Wisconsin,47901,9965,Northeast or North Central
-Alabama,43389,7706,South
-Arkansas,44245,8402,South
-Delaware,54680,12036,South
-District of Columbia,59000,15508,South
-Florida,45308,7762,South
-Georgia,49905,8534,South
-Kentucky,43646,8300,South
-Louisiana,42816,8519,South
-Maryland,56927,9771,South
-Mississippi,40182,7215,South
-North Carolina,46410,7675,South
-Oklahoma,42379,6944,South
-South Carolina,44133,8377,South
-Tennessee,43816,6979,South
-Texas,44897,7547,South
-Virginia,44727,9275,South
-West Virginia,40531,9886,South
-Alaska,54658,10171,West
-Arizona,45941,5585,West
-California,63640,8486,West
-Colorado,45833,8861,West
-Hawaii,51922,9879,West
-Idaho,42798,7042,West
-Montana,41225,8361,West
-Nevada,45342,6755,West
-New Mexico,42780,8622,West
-Oregon,50911,8649,West
-Utah,40566,5347,West
-Washington,47882,7958,West
-Wyoming,50692,11596,West
+ChildMortality,FemaleLiteracyRate,PerCapita_GNP,TotalFertilityRate
+128,37,1870,6.66
+204,22,130,6.15
+202,16,310,7
+197,65,570,6.25
+96,76,2050,3.81
+209,26,200,6.44
+170,45,670,6.19
+240,29,300,5.89
+241,11,120,5.89
+55,55,290,2.36
+75,87,1180,3.93
+129,55,900,5.99
+24,93,1730,3.5
+165,31,1150,7.41
+94,77,1160,4.21
+96,80,1270,5
+148,30,580,5.27
+98,69,660,5.21
+161,43,420,6.5
+118,47,1080,6.12
+269,17,290,6.19
+189,35,270,5.05
+126,58,560,6.16
+12,81,4240,1.8
+167,29,240,4.75
+135,65,430,4.1
+107,87,3020,6.66
+72,63,1420,7.28
+128,49,420,8.12
+27,63,19830,5.23
+152,84,420,5.79
+224,23,530,6.5
+142,50,8640,7.17
+104,62,350,6.6
+287,31,230,7
+41,66,1620,3.91
+312,11,190,6.7
+77,88,2090,4.2
+142,22,900,5.43
+262,22,230,6.5
+215,12,140,6.25
+246,9,330,7.1
+191,31,1010,7.1
+182,19,300,7
+37,88,1730,3.46
+103,35,780,5.66
+67,85,1300,4.82
+143,78,930,5
+83,85,690,4.74
+223,33,200,8.49
+240,19,450,6.5
+312,21,280,6.5
+12,79,4430,1.69
+52,83,270,3.25
+79,43,1340,7.17
+61,88,670,3.52
+168,28,410,6.09
+28,95,4370,2.86
+121,41,1310,4.88
+115,62,1470,3.89
+186,45,300,6.9
+47,85,3630,4.1
+178,45,220,6.09
+142,67,560,7.2
