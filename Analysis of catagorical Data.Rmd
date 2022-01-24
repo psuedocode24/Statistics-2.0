@@ -1,0 +1,315 @@
+######Homework 1#####
+####Question 1####
+##Motivation: To infer if the purchase activities constitute evidence of fraud.
+##Type Of Data: Nominal
+##Level Of measurement: Categorical
+##Statistical Test To Use: Chi Squared Goodness of Fit Test
+##Hypothesis:
+##H0: p1=30.1, p2=17.6, p3=12.5, p4=9.7, p5=7.9, p6=6.7, p7=5.8, p8=5.1, p9=4.6
+##H1: Atleast one proportion differs from the Benford's Law.
+##Decision: As the p value is statically very insignificant thus the null hypothesis is rejected. (Fail to reject null hypthesis)
+##Interpretation: Thus it can be interpreted that the purchase activities constitute evidence of fraud.
+## Through the study it can be seen that the cost of the supplies and equipment do not follow the Benford's Law which indicates that the there has been a fradulent activity in place.
+## Thus to have a better take at how to judge if there has been a discrepancy in the individual values of the supplies
+## We can use the Goodness of Fit Test. 
+##The Action items that I would recommend for the management would be to first monitor the supervisor activities. 
+##If required declare that any fraudulent activity will lead to being charged with penalty.
+##The model adopted to check for any suspicious activity should be incorporated within the company systems.
+
+Ques1 <- read.csv("Detecting Fraud.csv")
+Ques1 <- na.omit(Ques1)
+digit_1 <- subset(Ques1$Amount,substr(Ques1$Amount,1,1) == 1)
+digit_2 <- subset(Ques1$Amount,substr(Ques1$Amount,1,1) == 2)
+digit_3 <- subset(Ques1$Amount,substr(Ques1$Amount,1,1) == 3)
+digit_4 <- subset(Ques1$Amount,substr(Ques1$Amount,1,1) == 4)
+digit_5 <- subset(Ques1$Amount,substr(Ques1$Amount,1,1) == 5)
+digit_6 <- subset(Ques1$Amount,substr(Ques1$Amount,1,1) == 6)
+digit_7 <- subset(Ques1$Amount,substr(Ques1$Amount,1,1) == 7)
+digit_8 <- subset(Ques1$Amount,substr(Ques1$Amount,1,1) == 8)
+digit_9 <- subset(Ques1$Amount,substr(Ques1$Amount,1,1) == 9)
+n1 <- nrow(as.data.frame(digit_1))
+n2 <- nrow(as.data.frame(digit_2))
+n3 <- nrow(as.data.frame(digit_3))
+n4 <- nrow(as.data.frame(digit_4))
+n5 <- nrow(as.data.frame(digit_5))
+n6 <- nrow(as.data.frame(digit_6))
+n7 <- nrow(as.data.frame(digit_7))
+n8 <- nrow(as.data.frame(digit_8))
+n9 <- nrow(as.data.frame(digit_9))
+
+obs <- c(n1, n2, n3, n4, n5, n6, n7, n8, n9)
+exp <- c(30.1, 17.6, 12.5, 9.7, 7.9, 6.7, 5.8, 5.1, 4.6)/100
+
+##Using chi-squared goodness of fit test
+chisq.test(x = obs, p = exp )
+
+
+####Question 2####
+##Motivation: To infer if the data are normally distributed.
+##Type Of Data: Nominal
+##Level Of measurement: Categorical
+##Statistical Test To Use: Chi Squared Goodness of Fit Test
+##Hypothesis:
+##H0: Data are normally distributed.
+##H1: Data is not normally distributed.
+##Decision: As the p value is statically very insignificant thus the null hypothesis is rejected.(Fail To Reject Null Hypothesis) 
+##Interpretation: Thus it can be interpreted that the data is not sufficient to determine that the data is normally distributed.
+##Part a. It can be seen from the normal quantile plot that is nearly normal.
+##Part b. For more than 2 rows, chi-square should not be used if more than 20% of the expected frequency cells have expected frequencies less than 5. As it would be disqualified for sample size requirements.
+##Part d. No the chi squared test does not match with the normal quantile plot.
+##Part e. The advantage of using normal quantile plot to check for normality it is use to determine whether the data is normally distributed.
+##Whether the data is skewed, shorter than the expected tails or longer than the expected tails.
+##Advantages of chi square test is the robustness with respect to distribution of the data. 
+##Its ease of computation, the detailed information that can be derived from the test
+##Use in studies for which parametric assumptions cannot be met, and its flexibility in handling data from both two group and multiple group studies.
+Obs <- c(18, 19, 56, 128, 178, 66, 23, 16)
+
+## To find the expected probabilities
+(exp_p_1 <- pnorm(-0.03, mean = 0.0009874, sd = 0.0151, lower.tail = TRUE))
+(exp_p_2 <- pnorm(-0.02, mean = 0.0009874, sd = 0.0151, lower.tail = TRUE) - pnorm(-0.03, mean = 0.0009874, sd = 0.0151, lower.tail = TRUE))
+(exp_p_3 <- pnorm(-0.01, mean = 0.0009874, sd = 0.0151, lower.tail = TRUE) - pnorm(-0.02, mean = 0.0009874, sd = 0.0151, lower.tail = TRUE))
+(exp_p_4 <- pnorm(0, mean = 0.0009874, sd = 0.0151, lower.tail = TRUE) - pnorm(-0.01, mean = 0.0009874, sd = 0.0151, lower.tail = TRUE))
+(exp_p_5<- pnorm(0.01, mean = 0.0009874, sd = 0.0151, lower.tail = TRUE) - pnorm(0, mean = 0.0009874, sd = 0.0151, lower.tail = TRUE))
+(exp_p_6 <- pnorm(0.02, mean = 0.0009874, sd = 0.0151, lower.tail = TRUE) - pnorm(0.01, mean = 0.0009874, sd = 0.0151, lower.tail = TRUE))
+(exp_p_7 <- pnorm(0.03, mean = 0.0009874, sd = 0.0151, lower.tail = TRUE) - pnorm(0.02, mean = 0.0009874, sd = 0.0151, lower.tail = TRUE))
+(exp_p_8 <- pnorm(0.03, mean = 0.0009874, sd = 0.0151, lower.tail = FALSE))
+
+Exp <- c(exp_p_1, exp_p_2, exp_p_3, exp_p_4, exp_p_5, exp_p_6, exp_p_7, exp_p_8)
+
+result <- chisq.test(x = Obs, p = Exp) 
+result
+
+
+####Question 3####
+##Motivation: To infer if the the trading on some days is better or worse than the other.
+##Type Of Data: Nominal
+##Level Of measurement: Categorical
+##Statistical Test To Use: Chi Squared Goodness of Fit Test
+##Hypothesis:
+##H0: Day of the week and market direction are independent.
+##H1: Day of the week and market direction are dependent.
+##Decision: As the p value is greater than 0.05 thus we Fail to reject to the null hypothesis.
+##Interpretation: Thus H0 should not be rejected and it should be concluded that day of the week and market direction are independent.
+##Part b. The chi-squared test is used to determine whether the day of the week is related to the proportion. 
+##Testing the proportion only determines whether a given model for the parameter fits the data.
+##Part c. No quantitative conclusions can be drawn from the data about how much the market moved overall.
+Ques3 <- read.csv("Stock Market.csv")
+
+dm_up <- subset(Ques3,Ques3$Market.Direction == "Up" & Ques3$Day.of.Week == "Monday")
+dm_d <-  subset(Ques3,Ques3$Market.Direction == "Down" & Ques3$Day.of.Week == "Monday")
+tot_m <- as.numeric(dm_d$No..of.Days) + as.numeric(dm_up$No..of.Days)
+
+dt_up <- subset(Ques3,Ques3$Market.Direction == "Up" & Ques3$Day.of.Week == "Tuesday")
+dt_d <-  subset(Ques3,Ques3$Market.Direction == "Down" & Ques3$Day.of.Week == "Tuesday")
+tot_t <- as.numeric(dt_d$No..of.Days) + as.numeric(dt_up$No..of.Days)
+
+dw_up <- subset(Ques3,Ques3$Market.Direction == "Up" & Ques3$Day.of.Week == "Wednesday")
+dw_d <-  subset(Ques3,Ques3$Market.Direction == "Down" & Ques3$Day.of.Week == "Wednesday")
+tot_w <- as.numeric(dw_d$No..of.Days) + as.numeric(dw_up$No..of.Days)
+
+dth_up <- subset(Ques3,Ques3$Market.Direction == "Up" & Ques3$Day.of.Week == "Thursday")
+dth_d <-  subset(Ques3,Ques3$Market.Direction == "Down" & Ques3$Day.of.Week == "Thursday")
+tot_th <- as.numeric(dth_d$No..of.Days) + as.numeric(dth_up$No..of.Days)
+
+df_up <- subset(Ques3,Ques3$Market.Direction == "Up" & Ques3$Day.of.Week == "Friday")
+df_d <-  subset(Ques3,Ques3$Market.Direction == "Down" & Ques3$Day.of.Week == "Friday")
+tot_f <- as.numeric(df_d$No..of.Days) + as.numeric(df_up$No..of.Days)
+
+tot_d_row <- as.numeric(dm_d$No..of.Days) + as.numeric(dt_d$No..of.Days) + as.numeric(dw_d$No..of.Days) + as.numeric(dth_d$No..of.Days) + as.numeric(df_d$No..of.Days)
+tot_u_row <- as.numeric(dm_up$No..of.Days) + as.numeric(dt_up$No..of.Days) + as.numeric(dw_up$No..of.Days) + as.numeric(dth_up$No..of.Days) + as.numeric(df_up$No..of.Days)
+grand_tot <- tot_d_row + tot_u_row
+exp_pmd <- (tot_d_row*tot_m)/grand_tot
+exp_ptd <- (tot_d_row*tot_t)/grand_tot
+exp_pwd <- (tot_d_row*tot_w)/grand_tot
+exp_pthd <- (tot_d_row*tot_th)/grand_tot
+exp_pfd <- (tot_d_row*tot_f)/grand_tot
+
+exp_pmu <- (tot_u_row*tot_m)/grand_tot
+exp_ptu <- (tot_u_row*tot_t)/grand_tot
+exp_pwu <- (tot_u_row*tot_w)/grand_tot
+exp_pthu <- (tot_u_row*tot_th)/grand_tot
+exp_pfu <- (tot_u_row*tot_f)/grand_tot
+
+exp <- c(exp_pm, exp_pt, exp_pw, exp_pth, exp_pf, exp_pmu, exp_ptu, exp_pwu, exp_pthu, exp_pfu)
+obs <- c(41, 42, 39, 37, 45, 59, 55, 52, 57, 52)
+
+x1 <- ((41-exp_pm)^2)/exp_pm
+x2 <- ((42-exp_pt)^2)/exp_pt
+x3 <- ((39-exp_pw)^2)/exp_pw
+x4 <- ((37-exp_pth)^2)/exp_pth
+x5 <- ((45-exp_pf)^2)/exp_pf
+x6 <- ((59-exp_pmu)^2)/exp_pmu
+x7 <- ((55-exp_ptu)^2)/exp_ptu
+x8 <- ((52-exp_pwu)^2)/exp_pwu
+x9 <- ((57-exp_pthu)^2)/exp_pthu
+x10 <-((52-exp_pfu)^2)/exp_pfu
+##Degrees of Freedom = (number of col -1)(number of rows -1) = (2-1)(5-1) = 4
+tot_x <- x1 + x2 + x3 + x4 + x5 + x6 + x7 + x8 + x9 + x10
+pchisq(tot_x, 4, lower.tail = FALSE)
+
+####Question 4####
+##Motivation: To infer if Airline X is better than Airline Y.
+##Type Of Data: Nominal
+##Level Of measurement: Categorical
+##Statistical Test To Use: Just calculating the probabilities.
+
+##Part a. Since the on-time arrival rate for Airline Y is greater than Airline X. 
+##Thus Airline Y arrives on time more often.
+airx_ontime <- (6403/(6403+2549))*100
+airx_delayed <- (2549/(6403+2549))*100
+airy_ontime <- (4572/(4572+1645))*100
+airy_delayed <- (1645/(4572+1645))*100
+
+##Probability of flights arriving in diff destinations
+##Part b. It seems like a lurking variable(destination) might be at work because there is a change the number of airlines for both on time as well as delayed.
+on_time_denver <- (5718/(5718+2433))*100
+on_time_dallas <- (781/(781+299))*100
+on_time_minneapolis <- (500/(500+110))*100
+on_time_philadelphia <- (3976/(3976+1352))*100
+
+delayed_denver <- (2433/(5718+2433))*100
+delayed_dallas <- (299/(781+299))*100
+delayed_minnieapolis <- (110/(500+110))*100
+delayed_philadelphia <- (1352/(3976+1352))*100
+
+on_time_airx_dallas <- (airx_ontime/100)*487
+on_time_airx_denver <- (airx_ontime/100)*7533
+on_time_airx_minneappolis <- (airx_ontime/100)*457
+on_time_airx_philadelphia <- (airx_ontime/100)*475
+
+delayed_airx_dallas <- (airx_delayed/100)*487
+delayed_airx_denver <- (airx_delayed/100)*7533
+delayed_airx_minneapolis <- (airx_delayed/100)*457
+delayed_airx_philadelphia <- (airx_delayed/100)*475
+
+on_time_airy_dallas <- (airy_ontime/100)*593
+on_time_airy_denver <- (airy_ontime/100)*618
+on_time_airy_minneappolis <- (airy_ontime/100)*153
+on_time_airy_philadelphia <- (airy_ontime/100)*4853
+
+delayed_airy_dallas <- (airy_delayed/100)*593
+delayed_airy_denver <- (airy_delayed/100)*618
+delayed_airy_minneapolis <- (airy_delayed/100)*153
+delayed_airy_philadelphia <- (airy_delayed/100)*4853
+
+##Part c. Yes there is a lurking variable(Destination is the lurking variable) in play as the arrival times(On time Status and Delayed Status) are being influenced by the destination to which are the airlines travel.
+on_time_airx_dallas <- (airx_ontime/100)*339
+on_time_airx_denver <- (airx_ontime/100)*5285
+on_time_airx_minneappolis <- (airx_ontime/100)*376
+on_time_airx_philadelphia <- (airx_ontime/100)*403
+
+delayed_airx_dallas <- (airx_delayed/100)*339
+delayed_airx_denver <- (airx_delayed/100)*5285
+delayed_airx_minneapolis <- (airx_delayed/100)*376
+delayed_airx_philadelphia <- (airx_delayed/100)*403
+
+on_time_airy_dallas <- (airy_ontime/100)*442
+on_time_airy_denver <- (airy_ontime/100)*433
+on_time_airy_minneappolis <- (airy_ontime/100)*124
+on_time_airy_philadelphia <- (airy_ontime/100)*3573
+
+delayed_airy_dallas <- (airy_delayed/100)*442
+delayed_airy_denver <- (airy_delayed/100)*433
+delayed_airy_minneapolis <- (airy_delayed/100)*124
+delayed_airy_philadelphia <- (airy_delayed/100)*3573
+
+####Question 5####
+##Motivation: To infer if the Canadians and Americans differ in their responses to the question if recovering oil damages the environment. 
+##Type Of Data: Nominal
+##Level Of measurement: Categorical
+##Statistical Test To Use: Chi Squared Test of Independence.
+##Hypothesis:
+##H0: The responses of Americans and Canadians are Independent.
+##H1: The responses of Americans and Canadians are Dependent.
+##Decision: As the p value is statistically insignificant thus the null hypothesis is rejected.
+##Interpretation: Thus it can be inferred that the responses of the Americans and Canadians to the question if recovering oil damages the environment are dependant.
+
+Ques5 <- read.csv("Environmental Survey.csv")
+
+df_Ques5 <- na.omit(Ques5)
+
+chisq.test(df_Ques5$Canada, df_Ques5$US, correct = FALSE)
+
+mosaicplot(~ Canada + US, data = df_Ques5, 
+           main = "Mosaic Plot", xlab = "Canada", ylab = "US",
+           color = c(2, 4))
+
+####Question 6####
+##Motivation: To infer that the General Social Survey in 2014 over represented at least one education category.
+##Type Of Data: Nominal
+##Level Of measurement: Categorical
+##Statistical Test To Use: Chi Squared Goodness Of Fit Test.
+##Hypothesis:
+##H0: No education category is over-represented in the General Security Survey in 2014.
+##H1: Atleast one education category is over-represented in the General Security Survey in 2014.
+##Decision: As the p value is statistically insignificant thus the null hypothesis is rejected.
+##Interpretation: Thus it can be inferred that atleast one education category is over-represented in the General Security Survey in 2014.
+
+
+Ques6 <- read.csv("GSS2014.csv")
+
+na.omit(Ques6)
+
+less_hs <- nrow(subset(Ques6,Ques6$DEGREE == 0))
+hs <- nrow(subset(Ques6,Ques6$DEGREE == 1))
+junior <- nrow(subset(Ques6,Ques6$DEGREE == 2))
+bach_grad <- nrow(subset(Ques6,Ques6$DEGREE == 3 | Ques6$DEGREE == 4))
+tot_deg <- nrow(subset(Ques6,Ques6$DEGREE == 0 | Ques6$DEGREE == 1 | Ques6$DEGREE == 2 | Ques6$DEGREE == 3 | Ques6$DEGREE == 4))
+
+obs <- round(c(less_hs, hs, junior, bach_grad),2)
+exp <- round(c(12.3, 29.6, 19.4, 38.6)/100,2)
+
+chisq.test(x = obs, p = exp)  
+
+####Question 7####
+##Motivation: Analyse the relationship between two variables(educational degree and US Born)
+##Type Of Data: Ordinal and Interval
+##Level Of measurement: Categorical
+##Statistical Test To Use: Chi Squared Test Of Independence
+##Hypothesis:
+##H0: The immigrant's educational degree and born in US are independent.
+##H1: The immigrant's educational degree and born in US are dependent.
+##Decision: As the p value is statistically insignificant thus the null hypothesis is rejected.
+##Interpretation: Thus it can be inferred that the immigrant's with educational degree and born in US are dependent.
+
+Ques7 <- read.csv("GSS2014.csv")
+
+na.omit(Ques7)
+
+chisq.test(Ques7$DEGREE, Ques7$BORN)
+chisq.test(Ques7$DEGREE, Ques7$BORN, correct = FALSE)
+mosaicplot(~ BORN + DEGREE, data = Ques7, 
+           main = "Mosaic Plot", xlab = "BORN", ylab = "DEGREE",
+           color = c(2, 4, 1))
+
+####Question 8####
+##Motivation: Analyse the relationship between two variables(individual's age and news)
+##Type Of Data: Ordinal and Interval
+##Level Of measurement: Categorical
+##Statistical Test To Use: Spearman Rank Correlation Example
+##Hypothesis:
+##H0: rho =0
+##H1: rho!=0
+##Decision: As the p value is statistically insignificant thus the null hypothesis is rejected.
+##Interpretation: Thus it can be inferred that there is not enough evidence  believe that individual's age and news are related.
+
+
+Ques8 <- read.csv("GSS2014.csv")
+
+cor.test(x = Ques8$AGE, y = Ques8$NEWS, method = "spearman")
+
+
+####Question 9#### 
+##Motivation: Analyse the relationship between two variables(Martial and Degree)
+##Type Of Data: Ordinal and Interval
+##Level Of measurement: Categorical
+##Statistical Test To Use: Spearman Rank Correlation Example
+##Hypothesis:
+##H0: rho = 0
+##H1: rho !=0
+##Decision: As the p value is statistically insignificant thus the null hypothesis is rejected.
+##Interpretation: Thus it can be inferred that there is not enough evidence to believe that martial status and degree are related.
+
+Ques9 <- read.csv("GSS2014.csv")
+
+cor.test(x = Ques9$MARITAL, y = Ques9$DEGREE, method = "spearman")
