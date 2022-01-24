@@ -1,1 +1,241 @@
+install.packages("dplyr")
+install.packages("ggplot")
+install.packages("psych")
+install.packages("base.rms")
+install.packages("mathjaxr")
+install.packages("tidyr")
+
+####MIDTERM####
+
+####Question 1####
+
+### Develop a model on theoretical basis
+### Identify the dependent (response) and independent (predictor/explanatory) variables.
+
+### Profitability_of_Banks = f(EfficiencyRatio, TotalRiskBasedCapital)
+### Profitability_of_Banks = beta0 + beta1*EfficiencyRatio + beta2*TotalRiskBasedCapital + error
+
+### Read the data
+Ques1 <- read.csv("Community Banks.csv")
+ROAA <- Ques1$ROAA....
+EffiRatio <- Ques1$Efficiency.Ratio
+TotalCaptial <- Ques1$Total.Risk.Based.Capital.Ratio....
+
+### Observe whether there is a linear relationship between each explanatory (independent)
+### variable and the response (dependent) variable. Look for bending patterns.
+### Bending patterns between explanatory variables and the response variable would suggest transformations.
+### Plot a scatterplot matrix
+pairs(Ques1[3:5],panel = panel.smooth)
+
+### Correlation matrix
+### Using correlation matrix, we can assess the strength and direction of correlation.
+### The package Hmisc includes rcorr() function that displays r and the p-values.
+cor(Ques1[3:5])
+
+### Observations from the Corrlation Matrix:
+### Weak Positive correlation between ROAA and TotalRiskBasedCaptialRatio
+### p-values matrix shows that the correlation between ROAA and TotalRiskBasedCapitalRatio might be statistically significant
+### ROAA and TotalRiskBasedCapitalRatio might be statistically significant.
+### ROAA and EfficiencyRatio is not statistically significant.
+
+### Develop the multiple regression model.
+Bank_Model <- lm(ROAA ~ EffiRatio+TotalCaptial, data = Ques1)
+anova(Bank_Model)
+summary(Bank_Model)
+
+### Testing the overall model validity
+### H0: beta1 = beta2 = beta3 = 0 (There is no linear relationship between the dependent variable and the independent variables.)
+### H1: At least one beta(i) is not equal to zero. (There is a linear relationship between the dependent variable and at least one of the independent variables.)
+
+### p-value for the F-test: 1.273e-14. The overall model is valid.
+
+### This test measures the collective effect of all explanatory variables on the response variable.
+### Since the p-value is approx. 0, we infer that the ROAA, Efficiency Ratio, and Total Risk Capital Ratio are jointly significant
+### in explaining the variation in Profitability for the Bank.
+
+### R-sq = 0.2785. 28% of variation in ROAA is explained by variation in
+### Efficiency Ratio and Total Risk based Capital Ratio. The remaining 72% of variation is unexplained. 
+
+### Adj. R-sq = 0.2712. 
+
+### Estimated Regression Model
+###Profitability_of_Banks = 1.395 - 0.011*EfficiencyRatio + 0.028*TotalRiskBasedCapital + error
+
+
+### Interpreting the coefficients.
+### Intercept. The intercept is 1.395. This is the average ROAA when Efficiency Ratio and Total Capital Based Ratio are zero.
+### This is meaningless.
+
+### Efficiency Ratio: The relationship between ROAA and Efficiency Ratio is described by b1 = -0.0011. 
+### For each increase in the efficiency ratio, profitability of the banks decreases on average by 0.0011 productivity.
+### assuming other independent variables in the model are held constant.
+
+### Total Risk Based Capital Ratio. The relationship between ROAA and Total Risk Based Capital Ratio with the Bank is described by b2 = 0.028
+### For each increase in total risk based capital ratio with the bank, the profitability of the bank increases by 0.028
+### assuming other independent variables in the model are held constant.
+
+### Testing the coefficients (t-test for individual coefficients).
+### Null Hypothesis: beta(i) = 0
+### Alternative hypothesis: beta(i) =/= 0
+### t = (b(i) - beta(i))/se(b(i))
+
+### Test of Coefficient of Efficiency Ratio
+### p-value = 2.54e-07 Highly Statistically significant.
+### Enough evidence to conclude that Efficiency Ratio is linearly related to the ROAA.
+
+### Test of Coefficient of Total Risk Based Capital Ratio
+### p-value approx. 0. 3.11e-07 Highly statistically significant.
+### Overwhelming evidence that Total Risk Based Capital Ratio with the Company is linearly related to the ROAA.
+
+
+### Both the Total Risk Based Capital Ratio and the Efficiency Ratio is linearly related to the ROAA.
+
+
+### FULL MODEL: Contains ALL the independent variables.
+### In this case ROAA is the dependent variable and Efficiency Ratio and Total Risk Based Capital Ratio are independant variables
+fullmodel <- lm(ROAA ~ EffiRatio, TotalCaptial, data=Ques1)
+anova(fullmodel)
+###The p-value which is 6.653e-09 from the ANOVA output leads to the conclusion full model helps  infer at any reasonable significance level
+### that the Efficiency Ratio, Total Risk Based Capital Ratio both have 
+### a statistically significant influence on the ROAA included in the analysis.
+
+lm.RE <- lm(ROAA ~ EffiRatio)
+
+## Display the ANOVA table containing the SS information
+anova(lm.RE)
+
+## Display the Coefficients information
+summary(lm.RE)
+
+## 95% Confidence Interval for betas
+confint(lm.RE)
+
+#### Prediction and Confidence Intervals ####
+predict(lm.RE, data.frame(ROAA = 0.60, TotalCaptial = 0.15), interval = "prediction", level = 0.95)
+
+predict(lm.RE, data.frame(ROAA = 0.60, TotalCaptial = 0.15), interval = "confidence", level = 0.95)
+
+####Question 2####
+
+Ques2 <- read.csv("Caterpillar.csv")
+
+#### Correlation Coefficient and Scatterplot ####
+
+plot(Ques2$RM.Rf, 
+     Ques2$R.Rf, main = "Risk Adjusted Returns versus Adjusted Market Returns", xlab = "Rm Minus Rf", ylab = "R Minus Rf")
+abline(lm(Ques2$R.Rf ~ Ques2$RM.Rf))
+
+cor(Ques2$RM.Rf, Ques2$R.Rf)
+
+### If you want to find whether there is a correlation between Risk-adjusted Asset Returns and Risk-Adjusted Market Returns,
+### use a two-tailed test.
+### H0: rho = 0
+### H1: rho =/= 0
+
+cor.test(Ques2$RM.Rf, Ques2$R.Rf, alternative = "two.sided", method = "pearson")
+
+#### Regression Model ####
+
+R_Minus_Rf <- Ques2$R.Rf
+Rm_Minus_Rf <- Ques2$RM.Rf
+
+lm.CAPM <- lm(R_Minus_Rf ~ Rm_Minus_Rf)
+
+anova(lm.CAPM)
+
+summary(lm.CAPM)
+
+#### The estimate for the beta coefficient is 1.7584 and its standard error is 0.1843. 
+#### In order to determine whether the beta coefficient is significantly less than *one*, 
+#### we formulate the hypotheses as H0: beta <= 1 and H1: beta > 1.
+#### This is a non-standard case, so we cannot infer based on the T-Values and P-Values from R.
+
+#### First, we need to find the t_critical value. We will use qt function in R.
+#### Note the degrees of freedom (df) is n - k - 1 where k = number of predictors, which in this case is 1.
+
+t_critical <- qt(0.05, 60-1-1, lower.tail = TRUE)
+t_critical
+
+#### Next, we need to find the t_test_statistic value.
+#### t = (b - beta)/std. error
+
+t_test_stat <- (1.7584 - 1)/0.1843
+t_test_stat
+
+#### Decision.
+#### Since the t_test_stat is more than the t_critical, for a left-tailed test we reject the H0: beta <= 1.
+#### We infer at 5% significance level that beta > 1 and is statistically significant.
+#### Adjusted Risk Returns on  Caterpillar is less risky than the returns on the market.
+
+#### To test whether abnormal returns exist, we test whether the intercept, alpha is significantly different from 0.
+#### This is a standard case, where the hypothesized value is different from ZERO. So we can use the p-value reported 
+#### by R.
+#### Hypotheses are H0: alpha =/= 0 meaning there are abnormal returns, H1: alpha = 0 meaning no abnormal returns.
+#### The p-value for the intercept is 0.0945 which is > any reasonable significance level.
+#### So, at the 5% significance level, we can infer that alpha = 0 and Caterpillar has no abnormal returns.
+
+####Question 3####
+##Motivation: To infer that there are differences in household types among the three countries.
+##Type Of Data: Nominal
+##Level Of measurement: Categorical
+##Statistical Test To Use: Chi Squared Goodness Of Fit Test.
+##Hypothesis:
+##H0: No household category is over-represented in the random sample of the families in the three countries USA, Canada and UK.
+##H1: Atleast one household category is over-represented in the random sample of the families in the three countries USA, Canada and UK.
+##Decision: As the p value is statistically insignificant thus the null hypothesis is rejected.
+##Interpretation: Thus it can be inferred that atleast one household category is over-represented in the random sample of the families in the three countries USA, Canada and UK.
+library(tidyr)
+Ques3 <- read.csv("Household Types.csv")
+
+df_Ques3 <- pivot_longer(Ques3, cols = c("U.S.", "Canada", "U.K."), names_to = "Country", values_to = "Household_Type")
+
+df_Ques3 <- na.omit(df_Ques3)
+
+chisq.test(df_Ques3$Household_Type, df_Ques3$Country, correct = FALSE)
+
+mosaicplot(~ Country + Household_Type, data = df_Ques3, 
+           main = "Mosaic Plot", xlab = "Country", ylab = "Household_Type",
+           color = c(2, 4, 5, 3))
+
+
+####Question 4####
+
+Ques4 <- read.csv("Cost Control.csv")
+
+### FULL MODEL: Contains ALL the independent variables.
+### In this case, we have 4 - Paper, Machine, Overhead and Labor
+
+o <- Ques4$OVERHEAD
+p <- Ques4$PAPER
+l <- Ques4$LABOR
+m <- Ques4$MACHINE
+c <- Ques4$COST
+
+fullmodel <- lm(c ~ m + p + o + l)
+
+### REDUCED MODEL: Removes the independent variables to be tested.
+### In this case, we have two independent variables to be tested 
+### Advertisement, Machine and Paper.
+reducedmodel <- lm(c ~ m + p)
+
+summary(fullmodel)
+##By running the reduced model with the two variables Machine and Paper it's difficult to assess the variation in cost incurred by Ms. Levenworth.
+summary(reducedmodel)
+
+### The lm function does not provide us the SSEs for the full and reduced models.
+### We run the anova function in R to get these.
+anova(reducedmodel, fullmodel) ### Reduced model before full model
+
+
+### Conclusion and Interpretation
+### The p-value from the ANOVA  output or running the partial F-test gives a value of 0.4615 thus leads to fail to the rejection of H0.
+### H0: The reduced model and the full model do not differ significantly, so choose the reduced model.
+### The reduced model and the full model do not differ significantly, so choose the reduced model.
+### H1: The full model is significantly better.
+### We conclude that the reduced model and the full model do not differ significantly, thus choose the reduced model. So we infer at any reasonable significance level
+### that the Overhead and Labor do not have 
+### a statistically significant influence on cost incurred by Ms. Levenworth and they need not be included in the analysis.
+###Adding one more port would increase the cost by b_1
+
+
 
