@@ -1,0 +1,142 @@
+---
+title: "441 Homework 1"
+author: ''
+output:
+  html_document:
+    code_folding: hide
+    toc: yes
+    toc_float:
+      collapsed: yes
+      smooth_scroll: yes
+  pdf_document:
+    toc: yes
+---
+
+## Question 1 (20 points)
+### a
+What is the sample regression equation relating NUMPORTS to COST?
+
+```{r 1a}
+Q1 <- read.csv("COMMNODES.csv")
+
+#### Correlation Coefficient and Scatterplot ####
+plot(Q1$NUMPORTS, Q1$COST, xlab = "Numports", ylab = "Cost")
+abline(lm(Q1$COST ~ Q1$NUMPORTS))
+
+cor(Q1$COST, Q1$NUMPORTS)
+
+#### Regression Model ####
+lm.COMM <- lm(Q1$COST ~ Q1$NUMPORTS)
+anova(lm.COMM)
+sum <- summary(lm.COMM)
+sum$coefficients
+beta_0 <- sum$coefficients[1]
+beta_1 <- sum$coefficients[2]
+beta_0
+beta_1
+```
+
+The regression equation is Cost = 16593.65 + 650.1692*Numports
+
+### b 
+Is there sufficient evidence to conclude that a linear relationship exists between COST and NUMPORTS?
+
+Test to use: person
+
+H0:ρ=0(No correlation)
+
+H1:ρ≠0(There is a correlation)
+```{r 1b}
+cor.test(Q1$NUMPORTS, Q1$COST,alternative = "two.sided", method = "pearson")
+```
+INTERPRETATION AND FINAL CONCLUSION: At 5% significance level, there is sufficient evidence to support the claim that a linear relationship exists between COST and NUMPORTS.
+
+### c 
+Find and interpret the 95% confidence interval estimate of β1.
+```{r 1c}
+confint(lm.COMM)
+```
+The 95% confidence interval estimate of β1 is (504.3763, 795.962). We are 95% confident that the interval between 504.4 dollars and 796.0 dollars contains the true population mean change in cost of each additional port.
+
+### d
+A claim has been made that each new access port adds at least $1,000 to the installation cost of a communications node. Test this claim by using the test of β1.
+
+This requires us to test whether beta1 < 1000
+
+H0:beata1 >= 1000
+
+H0:beata1 < 1000
+```{r 1d}
+####  t_critical value
+t_critical <- qt(0.05, nrow(Q1)-1-1, lower.tail = T)
+t_critical
+
+#### t = (b - beta)/std. error
+std <- sum$coefficients[4]
+t_test_stat <- (beta_1 - 1000)/std
+t_test_stat
+
+t_test_stat < t_critical
+```
+INTERPRETATION AND FINAL CONCLUSION: At 5% significance level, since the t_test_stat is less than the t_critical, for a left-tailed test we reject H0: beta1 >= 1000. We infer at 5% significance level that beta1 < 1000 is statistically significant, which means the claim that each new access port adds at least $1,000 to the installation cost of a communications node is not true.
+
+## Question 2 (20 points)
+
+### a
+Run a multiple regression analysis and discuss your findings.
+```{r 2a}
+Q2 <- read.csv("MedicalCo.csv")
+SALES <- Q2$SALES
+ADV <- Q2$ADV
+BONUS <- Q2$BONUS
+MKTSHR <- Q2$MKTSHR
+COMPET <- Q2$COMPET
+
+# Correlation Matrix
+cor(as.matrix(Q2[1:3]))
+
+# Multiple Regression Model
+Model1 <- lm(SALES ~ ADV + BONUS)
+anova(Model1)
+summary(Model1)
+
+
+
+```
+As we can see from the correlation matrix, there is a strong positive correlation between sales and ADV, 0.9.
+Also a positive correlation between sales and bonus, 0.568.
+
+The regression eaquation is : SALES = -516.4443 + 2.4732* ADV + 1.8562*BONUS
+beta0 =-516.4. It means that when there is no advertising and bonus, sales would be -516.4 thousand dollars.This is a meaningless intercept because sales will never be negative.
+
+beta1 = 2.4732. It means that for every 100 dollars increase of ADV, sales would increase 2473.2 dollars.
+
+beta2 = 1.8562. It means that for every 100 dollars increase of bonus, sales would increase 1856.2 dollars.
+The R-square value is 85.49% which means 85.49% of variation in SALES is explained by the model. The remaining 14.51% is unexplained. The adjusted R-square is 84.18%. The standard error of the model is 90.74 thousand dollars.
+
+
+
+### b
+Run an appropriate test to see if these two variables should be included in the model or not. What is your conclusion?
+```{r 2b}
+# Correlation Matrix
+cor(as.matrix(Q2[c(1,4,5)]))
+
+# Multiple Regression Model
+Model2 <- lm(SALES ~ ADV + BONUS + MKTSHR + COMPET)
+anova(Model2)
+summary(Model2)
+
+#comparison
+anova(Model1, Model2)
+```
+As we can see from the correlation matrix, there is a weak positive correlation between sales and MKTSHR, 0.0231.
+Also a weak positive correlation between sales and COMPET, 0.377.
+
+From the summary of this model, the p-value of MKTSHR and COMPET are pretty large, which means these two variables are not significant. Also, p-value of partial F is more than 0.05.
+It's better to exclude these two variables and choose model1.
+
+
+
+
+

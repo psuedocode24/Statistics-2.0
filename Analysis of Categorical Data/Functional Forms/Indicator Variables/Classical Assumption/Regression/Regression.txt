@@ -1,0 +1,188 @@
+###########################
+#### SOLVED EXAMPLE 1 #####
+###########################
+
+### Develop a model on theoretical basis
+### Identify the dependent (response) and independent (predictor/explanatory) variables.
+
+### Weeks of SP = f(Age, Years, AnnualPay)
+### Weeks_SP = beta0 + beta1*Age + beta2*Years + beta3*AnnualPay + error
+
+### Read the data
+Pay <- read.csv("SolvedExample4.csv")
+
+### Observe whether there is a linear relationship between each explanatory (independent)
+### variable and the response (dependent) variable. Look for bending patterns.
+### Bending patterns between explanatory variables and the response variable would suggest transformations.
+### Plot a scatterplot matrix
+plot(Pay) 
+### OR
+pairs(Pay[1:4], panel = panel.smooth)
+
+### Correlation matrix
+### Using correlation matrix, we can assess the strength and direction of correlation.
+### The package Hmisc includes rcorr() function that displays r and the p-values.
+cor(Pay)
+### OR
+### Use the rcorr function in the Hmisc package. This displays the r and p-values
+Hmisc::rcorr(as.matrix(Pay))
+
+### Observations from the Corrlation Matrix:
+### Strong Positive correlation between WeeksSP and Age, WeeksSP and Years
+### Weak Positive correlation between WeeksSP and Pay
+### p-values matrix shows that the correlation between WeeksSP and Age is statistically significant
+### WeeksSP and Years is statistically significant.
+### WeeksSP and Pay is not statistically significant.
+
+### Develop the multiple regression model.
+Pay_Model <- lm(WeeksSP ~ Age+Years+Pay, data = Pay)
+anova(Pay_Model)
+summary(Pay_Model)
+
+### Testing the overall model validity
+### H0: beta1 = beta2 = beta3 = 0 (There is no linear relationship between the dependent variable and the independent variables.)
+### H1: At least one beta(i) is not equal to zero. (There is a linear relationship between the dependent variable and at least one of the independent variables.)
+
+### p-value for the F-test: 3.758e-12. The overall model is valid.
+
+### This test measures the collective effect of all explanatory variables on the response variable.
+### Since the p-value is approx. 0, we infer that the Age, Years, and Pay are jointly significant
+### in explaining the variation in Weeks of Severance Pay.
+
+### R-sq = 0.702. 70% of variation in Weeks SP is explained by variation in
+### Age, Years, and Pay. The remaining 30% of variation is unexplained. 
+
+### Adj. R-sq = 0.6825. 
+
+### Estimated Regression Model
+### SP_hat = 6.06 - 0.007*Age + 0.603*Years - 0.07*Pay
+
+### Interpreting the coefficients.
+### Intercept. The intercept is 6.06. This is the average Weeks of SP when Age, Years, and Pay are zero.
+### This is meaningless.
+
+### Age. The relationship between Weeks SP and Age is described by b1 = -0.0078. 
+### For each additional year of age, weeks of SP decreases on average by 0.0078 weeks
+### assuming other independent variables in the model are held constant.
+
+### Years. The relationship between Weeks SP and No. of Years with the Company is described by b2 = 0.603
+### For each additional year with the company, the no. of weeks of severance pay increases by 0.603
+### assuming other independent variables in the model are held constant.
+
+### Pay. The relationship between Weeks SP and Annual Pay is described by b3 = -0.0702.
+### For every one thousand dollars increase in annual pay, the no. of weeks of severance package decreases
+### by 0.07 weeks assuming other independent variables in the model are held constant.
+
+### Testing the coefficients (t-test for individual coefficients).
+### Null Hypothesis: beta(i) = 0
+### Alternative hypothesis: beta(i) =/= 0
+### t = (b(i) - beta(i))/se(b(i))
+
+### Test of Coefficient of Age
+### p-value = 0.9069. Not statistically significant.
+### Not enough evidence to conclude that Age is linearly related to the No. of Weeks of SP.
+
+### Test of Coefficient of Years
+### p-value approx. 0. Highly statistically significant.
+### Overwhelming evidence that No. of Years with the Company is linearly related to the No. of Weeks of SP.
+
+### Test of Coefficient of Annual Pay
+### p-value = 0.1864. Not statistically significant.
+### Not enough evidence to conclude that Annual Pay is linearly related to the No. of Weeks of SP.
+
+### Only No. of Years with the company is linearly related to the severance pay.
+
+### Prediction Interval for Bill Smith. Age = 32 years, No. of years with the company = 10, Pay = $32,000
+predict(Pay_Model, data.frame(Age = 36, Years = 10, Pay = 32), interval = "prediction", level = 0.95)
+### Predict with 95% confidence 9.57 weeks of pay (point estimate)
+### LCL = 5.63 weeks of pay 
+### UCL = 13.50 weeks of pay.
+### The offer of 5 weeks severance pay falls below the prediction interval and thus Bill is correct.
+
+###########################
+#### SOLVED EXAMPLE 2 #####
+###########################
+
+CarWash <- read.csv("SolvedExample5.csv")
+
+### FULL MODEL: Contains ALL the independent variables.
+### In this case, we have three - Price Discount, Radio Exp, and Newspaper Exp.
+fullmodel <- lm(Sales_1000s ~ ., data = CarWash)
+
+### REDUCED MODEL: Removes the independent variables to be tested.
+### In this case, we have two independent variables to be tested 
+### Radio Exp, and Newspaper Exp.
+reducedmodel <- lm(Sales_1000s ~ PriceDiscount_Percent, data = CarWash)
+
+summary(fullmodel)
+summary(reducedmodel)
+
+### The lm function does not provide us the SSEs for the full and reduced models.
+### We run the anova function in R to get these.
+anova(reducedmodel, fullmodel) ### Reduced model before full model
+
+### OR you could display the SSE for the two models separately and calculate the F-statistic manually.
+
+anova(reducedmodel)
+anova(fullmodel)
+
+### Conclusion and Interpretation
+### The p-value from the ANOVA output leads to the rejection of H0
+### H0: The reduced model and the full model do not differ significantly, so choose the reduced model.
+### The reduced model and the full model do not differ significantly, so choose the reduced model.
+### H1: The full model is significantly better.
+### We conclude that the full model is better, so we infer at any reasonable significance level
+### that the advertising expenditures on radio and newspapers have 
+### a statistically significant influence on sales and should be included in the analysis.
+
+### Partial R-squared
+### SSE(reduced) = 2182.6
+### SSE (full) = 1208.1
+(partial_r_sq <- (2182.6 - 1208.1)/2182.6)
+## The Radio expenditures and newspaper expenditures variables explain 44.64% of the variation in Sales that cannot be
+## explained by PriceDiscount alone.
+## OR
+## The additional independent variables - radio and newspaper expenditures - in the complete model explain 44.64% of 
+## the unexplained variation in the reduced model.
+
+##################################################
+#### SOLVED EXAMPLE 2 - ALTERNATIVE APPROACH #####
+##################################################
+
+CarWash <- read.csv("SolvedExample5.csv")
+
+### FULL MODEL: Contains ALL the independent variables.
+### In this case, we have three - Price Discount, Radio Exp, and Newspaper Exp.
+fullmodel <- lm(Sales_1000s ~ ., data = CarWash)
+
+### REDUCED MODEL: Removes the independent variables to be tested.
+### In this case, we have two independent variables to be tested 
+### Radio Exp, and Newspaper Exp.
+reducedmodel <- lm(Sales_1000s ~ PriceDiscount_Percent, data = CarWash)
+
+f <- anova(fullmodel)
+r <- anova(reducedmodel)
+
+### Retrieving the SSEs for the full and the reduced models
+SSE_F <- f$`Sum Sq`[4]
+SSE_R <- r$`Sum Sq`[2]
+MSE_F <- f$`Mean Sq`[4]
+
+Num <- (SSE_R - SSE_F)/2
+Den <- MSE_F
+8008648331
+
+### Calculating the Partial F-statistic
+Partial_F_stat <- Num/Den
+
+### Calculating the p-value
+pf(Partial_F_stat, 2, nrow(CarWash)-3-1, lower.tail = FALSE)
+
+### Conclusion and Interpretation
+### The p-value from the ANOVA output leads to the rejection of H0
+### H0: The reduced model and the full model do not differ significantly, so choose the reduced model.
+### The reduced model and the full model do not differ significantly, so choose the reduced model.
+### H1: The full model is significantly better.
+### We conclude that the full model is better, so we infer at any reasonable significance level
+### that the advertising expenditures on radio and newspapers have 
+### a statistically significant influence on sales and should be included in the analysis.
