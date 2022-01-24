@@ -1,0 +1,573 @@
+---
+title: "441 Final Exam"
+author: 'ASHI MALIK'
+output:
+  html_document:
+    code_folding: hide
+    toc: yes
+    toc_float:
+      collapsed: yes
+      smooth_scroll: yes
+  pdf_document:
+    toc: yes
+---
+
+## Question 1
+### Read the data
+
+```{r}
+
+fred_homes <- read.csv("Frederick Homes.csv")
+head(fred_homes)
+
+asking_price <- fred_homes$Asking.Price
+lot_size <- fred_homes$Lot.Size
+living_space <- fred_homes$Living.Space
+yearly_tax <- fred_homes$Yearly.Taxes
+central_ac <- fred_homes$Central.A.C
+bedrooms <- fred_homes$Bedrooms
+bathrooms <- fred_homes$Bathrooms
+age <- fred_homes$Age
+parking_space <- fred_homes$Parking.Spaces
+basement <- fred_homes$Finished.Basement
+brick <- fred_homes$Brick
+fireplace <-fred_homes$Fireplace
+```
+
+### Run a full model to assess multicollinearity
+
+```{r}
+full_model <- lm(asking_price ~ lot_size + living_space + yearly_tax + central_ac + bedrooms + bathrooms + age + parking_space + basement + brick + fireplace)
+
+summary(full_model)
+car::vif(full_model)
+```
+
+As seen from VIF values it can be concluded that there is no serious multicollinearity present in the model with a threshold of 10
+
+### Run a Stepwise Regression for variable selection
+
+```{r}
+library(olsrr)
+step_reg <- olsrr::ols_step_both_p(full_model,  prem = 0, pent = 0.05, details = TRUE)
+plot(step_reg)
+```
+
+The output model after running the step wise regression is asking_price=31.572+0.109∗yearly_tax−0.551∗age+8.846∗brick−0.008∗living_space+ϵ
+
+### Run a Best Subset regression for variable selection
+
+```{r}
+best_subset_reg <- ols_step_best_subset(full_model, details = TRUE)
+best_subset_reg
+```
+
+As seen from the AIC value, it can see that the model with 6 variables has the best fit. Also, implying that the asking price of a house should be dependent on the number of bedrooms and the lot size. Thus, proceed with the model with 6 variables
+
+The possible model by using the best subset regression is
+asking_price∼yearly_tax, age, brick, living_space, lot_size, bedrooms
+
+Now checking the assumptions of multiple regression
+
+### Checking Linearity
+
+```{r}
+model_data <- data.frame(asking_price, age, yearly_tax, living_space,  brick, bedrooms, lot_size)
+plot(model_data)
+```
+
+As seen from the graph, it can be inferred that the variables follow a linear relationship with Y
+
+### Checking Heteroscedasticity
+
+```{r}
+final_model <- lm(asking_price ~ age + yearly_tax + living_space + brick + bedrooms + lot_size)
+residual_final_model <- residuals(final_model)
+fit_final_model <- predict(final_model)
+
+plot(x = fit_final_model, y = residual_final_model,  main = "Residual vs Fit", xlab = "Fit",ylab = "Residual")
+```
+
+As seen from the residual wrt the fitted, it can be inferred that there is presence of heteroscedasticity in the data which is introduced due to an  an outlier
+
+### Check Normality
+
+s seen from the residual wrt the fitted plot, it can be seen that there is no pattern in the data. Thus it can be inferred that the data is normal
+
+### Remedy of  Heteroscedasticity
+
+We apply log transform on the Y variable as it can reduce heteroscedasticity.
+
+```{r}
+ln_asking_price <- log(asking_price)
+```
+
+
+```{r}
+# Runnthe regression on transformed Y
+trans_model <- lm(ln_asking_price ~ living_space + yearly_tax + age + brick + lot_size + bedrooms)
+residual_trans_model <- residuals(trans_model)
+fit_trans_model <- predict(trans_model)
+
+plot(x = fit_trans_model, y = residual_trans_model, main = "Residual vs Fit", xlab = "Fit", ylab = "Residual")
+```
+
+After transforming the y variable, it can be observed from the residual vs fitted plot that it has reduced the effect of the outier thus implying  that the model does not suffer from heteroscedasticity
+
+INTERPRETATIONS:
+The regression equation is population=5.225e−2.777e−05∗living_space+2.349e−04∗yearly_tax−1.530e−03∗age+3.924e−02∗brick+4.135e−02∗lot_size−3.970e−03∗bedrooms+e
+The intercept and the variable living space, age, yearly_tax and brick are statistically significant.
+
+Living Space- While keeping other variables constant, on increasing the living space by 1 sq feet decreases the asking price by 0.0027%.
+
+Yearly Tax- While keeping other variables constant, on increasing the yearly tax by 1 dollar increases the asking price by 0.0239%.
+
+Brick: While keeping other variables constant, in case the house is built-up of brick it increases the asking price by 3.92%.
+
+Age: While keeping other variables constant, an increase in age of the house by 1 year decreases the asking price by 0.15%
+
+R-square, Adj. R-square and Standard Error:
+The R2 value of the model is 0.9728 which means that the model is able to explain 99.41% of the variation in the data. The adjusted R2 is 0.9698.
+
+Global F-test:To check the validity of the model
+Hypothesis:
+H0:beta_1=beta_2=beta_3=beta_40
+H1:Atleast one beta_i != 0
+
+After running the Global F-test  the p-value obtained is < 2.2e-16. This shows that the p-value is statically significant. Hence we reject the Null Hypothesis and conclude that the overall model is valid.
+
+## Question 2
+### Read the data
+
+```{r}
+absenteeism <- read.csv("Absenteeism.csv")
+
+absent<- absenteeism$ABSENT
+complx <- absenteeism$COMPLX
+satis <- absenteeism$SATIS
+senior <- absenteeism$SENIOR
+seniorv <- 1/senior
+
+## Create dummy variables
+fs1 <- ifelse(absenteeism$SATIS == 1, 1, 0)  
+fs2 <- ifelse(absenteeism$SATIS == 2 ,1, 0)
+fs3 <- ifelse(absenteeism$SATIS == 3, 1, 0)
+fs4 <- ifelse(absenteeism$SATIS == 4, 1, 0)
+fs5 <- ifelse(absenteeism$SATIS == 5, 1, 0) ##Base or Reference
+```
+
+### Creating full model
+
+```{r}
+full_model <- lm(absent ~ complx + seniorv + fs1 + fs2 +fs3 + fs4)
+summary(full_model)  
+anova(full_model)
+```
+
+Regression Equation: absent = 1.630604 -0.014070*complex + 1.102841/senior + 0.0.904105*fs1 + 1.604197*fs2 +0.411077*fs3 -0.069527*fs4 + e
+After running the Global F -test the p-value is 4.04e-05 which shows that the overall model is valid. The R^2 value is 0.3405 which implies that the explanotary variables are able to explain 34.05% variance in absence.
+The adjustment R^2 is 0.284.
+
+### Creating reduced model
+
+```{r}
+reduced_model <- lm( absent ~ complx + seniorv , 
+                  data = absenteeism)
+summary(reduced_model)
+anova(reduced_model)
+```
+
+Regression Equation: absent = 2.047420 -0.012060*complex + 1.281891/senior + e
+After running the Global F -test the p-value is 0.0001602 which shows that the overall model is valid. The R^2 value is 0.2104 which implies that the explanatory variables are able to explain 21.04% variance in absence.
+The adjustment R^2 is 0.189.
+
+## Partial F-Test
+```{r}
+anova(reduced_model,full_model)
+```
+After running the partial f-test the p-value is 0.01238 which shows that the full model is a better option by rejecting the null hypothesis.
+
+```{r}
+## Predict the average absenteeism rate for all employees with COMPLX = 60 and SENIOR = 30 who were very dissatisfied with their managers
+pred <- predict(full_model, 
+                data.frame(seniorv = 1/30, complx= 60, fs1=1, fs2=0, fs3=0, fs4=0))
+```
+The predicted value of absenteeism rate for all employees with COMPLX = 60 and SENIOR = 30 who were very dissatisfied with their managers is 1.727265 
+
+```{r}
+
+## The prediction of the average absenteeism rate for all employees with COMPLX = 60 and SENIOR = 30 who were very satisfied with their managers
+pred <- predict(full_model, 
+                data.frame(seniorv = 1/30, complx= 60, fs1=0, fs2 = 0, fs3 = 0, fs4 = 0)) 
+
+```
+The prediction of the average absenteeism rate for all employees with COMPLX = 60 and SENIOR = 30 who were very satisfied with their managers is 0.8231598.
+
+
+```{r}
+## Prediction of the average absenteeism rate for all employees with COMPLX = 10 and SENIOR = 3 who were very dissatisfied with their managers
+pred <- predict(full_model, 
+                data.frame(seniorv = 1/3, complx= 10, fs1=1, fs2=0, fs3=0, fs4=0)) 
+```
+The prediction of the average absenteeism rate for all employees with COMPLX = 10 and SENIOR = 3 who were very dissatisfied with their managers is 2.761622.
+
+```{r}
+## Prediction of the average absenteeism rate for all employees with COMPLX = 10 and SENIOR = 3 who were very satisfied with their managers
+pred <- predict(full_model, 
+                data.frame(seniorv = 1/3, complx= 10, fs1=0,  fs1=0, fs2 = 0, fs3 = 0, fs4 = 0)) 
+```
+The prediction of the average absenteeism rate for all employees with COMPLX = 10 and SENIOR = 3 who were very satisfied with their managers is 1.857517.
+
+This study can be used by management to identify the rate of absenteeism that employees with a greater job experience and higher complexity of work are less dissatisfied or satisfied with their respective managers wrt to the ones that are not the experienced. Hence leads to believe that the absenteeism rate is higher for the younger employees when compared to the experienced employees or older employees.
+
+## Question 3
+### Reading the csv file
+
+```{r}
+sp500 <- read.csv("SP500.csv")
+## Importing the dplyr library
+library(dplyr)
+## Adding a lag variable
+sp500<- sp500 %>% mutate(lag_y = lag(S.P))
+## Omitting any presence of na
+sp500 <- na.omit(sp500)
+## Introducing the lag variable
+x <- sp500$lag_y
+y <- sp500$S.P
+```
+
+### Running a regression model
+
+```{r}
+model <- lm(y ~ x)
+summary(model)
+```
+
+The regression equation is y = 8.806181 + 0.998917*x
+After running the Global F-test the p value is : 2.2e-16 which implies that null hypothesis can be rejected and the overall model is valid.
+The R^2 value is 0.9955 which implies that the explanatory variables are able to explain 99.55% variance in y.
+Adjusted R^2 value is 0.9955.
+
+
+
+```{r}
+resids <- residuals(model)
+sp500fcst <- predict(model) 
+## Plotting the fitted vs residual model
+
+plot(x=sp500fcst, y=resids, xlab = "Fitted Plot", ylab = "Residuals Plot", main = "Fitted Vs Residuals Model")
+```
+
+As can be seen from the plot the shape is fan shaped which means more than proportionally increasing with x. Thus applying a transformation of variable x into 1/x which might be the probable remedy to reduce heteroscedascity. 
+
+```{r}
+### Step 3: Run the regression against the X variables 1/X
+
+Y_trans <- y/x
+x_rec <- 1/x
+
+model_1 <- lm(Y_trans ~ x_rec + 1 )
+summary(model_1)
+```
+
+```{r}
+### Check if there is evidence of heteroscedasticity
+resid <- residuals(model_1)
+predict <- predict(model_1)
+
+### Obtain the predicted values and square them
+resids_sq <- residuals(model_1)^2
+pred_sq <- predict(model_1)^2
+
+### Step 2: Run the auxiliary regression
+### Resid_sq = alpha1 + alpha2*PredictedY_sq + vi
+model_l1 <- lm(resids_sq ~ pred_sq)
+summary(model_l1)
+```
+
+After the running the regression on the residual and fore casted value it can be seen that the p value is 0.1118 which is greater than 0.05.
+Implying that to fail to reject HO. Thus there is no sign of heteroscedasticity in the transformed residuals.
+H0: No Evidence of heteroscedasticity
+H1: Evidence of heteroscedasticity
+
+### Plotting to check if there's a presence of heteroscedasticity after transformation of the x variable
+
+```{r}
+plot(x=predict, y=resid, xlab = "Fitted Plot", ylab = "Residuals Plot", main = "Fitted Vs Residuals Model")
+```
+
+As can be seen from the plot there is no presence of heteroscedasticity.
+
+
+
+## Question 4
+
+## The Regression equation is: Di^=210+733∗Fi−0.805∗Si+74.0Ai
+
+## Part A
+## 1. Fi
+##Hypothesis
+## H0:β1=0
+## H1:β1>0
+
+## b1=733
+## sb1=253
+
+```{r}
+b_1 <- 733
+s_b1 <- 253
+
+t_b1 <- b_1/s_b1
+t_b1
+
+t_cri <- qt(0.05, 29)
+t_cri
+```
+
+## As can be observed that tb1>tcritical thus rejecting the null hypothesis and concluding that Fi is significant.
+
+## 2. Si
+## Hypothesis
+## H0:β2=0
+## H1:β2<0
+
+## b2=−0.805
+## sb2=0.752
+
+```{r}
+b_2 <- -0.805
+s_b2 <- 0.752
+
+t_b2 <- b_2/s_b2
+t_b2
+
+t_crit <- qt(0.05, 29)
+t_crit
+```
+
+## As can be observe that tb2>−tcritical. Thus failing to reject the null hypothesis and concluding that Si is not significant.
+## 3. Ai
+## Hypothesis
+## H0:β2=0
+## H1:β2>0
+
+## b3=74.0
+## sb3=12.4
+
+```{r}
+b_3 <- 74
+s_b3 <- 12.4
+
+t_b3 <- b_3/s_b3
+t_b3
+
+t_critical <- qt(0.05, 29)
+t_critical
+
+```
+## As can be observe that tb3>tcritical.Thus rejecting the null hypothesis and concluding that Ai is significant.
+
+## Part B
+##The current model has an issue because the coefficient of Si is not significant and the sign appears to be wrong which could indicate some form of violation of CLRM assumptions.
+
+## Part C
+## In case of  a simple correlation coefficient between Si and Ai is 0.94, implies that these variables are highly correlated which woyld thus would cause multicolinearity issues in the model, inflate up the variance of the variables and deflate the t-value that would make the individual variables statistically insignificant.
+
+
+## Question 5
+```{r}
+us_pop <- read.csv("US Population.csv")
+us_pop$POPULATION <- as.numeric(gsub(',','',us_pop$POPULATION))
+us_pop <- na.omit(us_pop)
+
+time <- us_pop$TIME
+year <- us_pop$YEAR
+pop <- us_pop$POPULATION
+```
+## Run the regression model 
+```{r}
+model <- lm(pop ~ time)
+summary(model)
+```
+## The Regression equation is : 108961085 + 2311504*time
+## After running the Global F Test we can see that the p -value is 2.2e-16 which is significant and hence the over all model is valid.
+## The R^2 is 0.9955 which means that 99.41% of the variation is time is explained by population. The adjusted R^2 is 0.994.
+
+### Graphical - Residuals versus Time
+
+```{r}
+resid <- residuals(model)
+plot(x=time, type="b", y=resid, pch=19, 
+     xlab = "Time", ylab = "Residuals", 
+     main = "Time-Sequence Plot")
+abline(h=0)
+```
+
+### The plot shows that the residuals don't seem to be randomly distributed.
+### Shows signs of (positive) autocorrelation
+
+
+### Graphical - Residuals(t) versus Residuals(t-1)
+
+
+```{r}
+lag.plot(resid, lags = 1, do.lines = FALSE, 
+         diag = FALSE, 
+         main = "Residuals versus Lag 1 Residuals")
+abline(h=0, v=0)
+```
+
+### The plot shows evidence of positive autocorrelation.
+
+### Durbin-Watson d Statistic
+### Calculating using principles
+
+```{r}
+ts_resid <- ts(resid)
+ts_resid_lag_1 <- stats::lag(ts_resid, -1)
+D <- ts_resid - ts_resid_lag_1
+D_sq <- D^2
+e_sq <- resid^2
+dw <- sum(D_sq)/sum(e_sq)
+dw
+```
+
+### Using the command
+```{r}
+lmtest::dwtest(model, alternative = 'greater')
+```
+
+### The p-value = 2.2e-16 is very small which results in rejecting the null hypothesis, indicating there is an evidence of
+### positive first-order autocorrelation.
+## H_0: rho = 0
+## H_1: rho > 0
+## This suggests that alternative hypothesis is true by rejecting null hypothesis suggesting evidence of positive autocorrelation.
+
+## Adding the lagged dependent variable to the equation 
+
+```{r}
+library(dplyr)
+```
+
+## Adding a lag variable
+```{r}
+us_pop_l <- us_pop %>% mutate(lag_y = lag(POPULATION))
+us_pop_l <- na.omit(us_pop_l)
+
+pop_1 <- us_pop_l$POPULATION
+population_lag <- us_pop_l$lag_y
+time_1 <- us_pop_l$TIME
+```
+## Running a regression model with a lagged variable
+```{r}
+model_c <- lm(pop_1 ~ time_1 + population_lag)
+summary(model_c)
+```
+
+## The Regression equation is : 1.122e+07 + 2.272e+05*time_1 + 9.092e-01*population_lag
+## After running the Global F Test we can see that the p -value is 2.2e-16 which is significant and hence the over all model is valid.
+## The R^2 is 0.9999 which means that 99.41% of the variation is time is explained by population. The adjusted R^2 is 0.9999.
+
+
+## install.packages("ecm")
+```{r}
+library(ecm)
+
+durbinH(model_c, "population_lag") ## Using the package
+### Durbin's h statistic = 7.306299 (using the package)
+```
+
+### H0: rho = 0
+### H1: rho > 0
+### z_alpha
+```{r}
+qnorm(0.05, mean = 0, sd = 1, lower.tail = FALSE)
+```
+### Reject H0 if h > 1.65
+
+### Since h = 7.306299 > 1.65, we reject H0.
+### Conclusion: First order autocorrelation is a problem.
+### Adding a lagged variable did not prove effective in correcting for autocorrelation.
+```{r}
+us_pop_l <- us_pop %>% mutate(lag_y = lag(POPULATION))
+us_pop_l <- na.omit(us_pop_l)
+
+
+pop_1 <- us_pop_l$POPULATION
+population_lag <- us_pop_l$lag_y
+time_1 <- us_pop_l$TIME
+```
+## Running a regression model with a lagged variable
+```{r}
+model_c <- lm(pop_1 ~ time_1 + population_lag)
+summary(model_c)
+```
+
+## The Regression equation is : 1.122e+07 + 2.272e+05*time_1 + 9.092e-01*population_lag + e
+## After running the Global F Test we can see that the p -value is 2.2e-16 which is significant and hence the over all model is valid.
+## The R^2 is 0.9999 which means that 99.41% of the variation is time is explained by population. The adjusted R^2 is ## 0.9999.
+
+
+```{r}
+us_pop_ll <- us_pop_l %>% mutate(lag_yl = lag(lag_y))
+us_pop_ll <- na.omit(us_pop_ll)
+
+
+pop_2 <- us_pop_ll$POPULATION
+population_lag_2 <- us_pop_ll$lag_yl
+time_2 <- us_pop_ll$TIME
+population_lag <- us_pop_ll$lag_y
+
+```
+
+## Running a regression model with a lagged variable
+```{r}
+model_cl <- lm(pop_2 ~ time_2 + population_lag + population_lag_2)
+summary(model_cl)
+```
+## The Regression equation is : 3.958e+06 + 8.115e+04*time_2 + 1.769e+00*population_lag -8.027e-01*population_lag_2 + e
+## After running the Global F Test we can see that the p -value is 2.2e-16 which is significant and hence the over all model is valid.
+## The R^2 is 1 which means that 100% of the variation is time is explained by population. The adjusted R^2 is 1.
+
+## install.packages("ecm")
+```{r}
+library(ecm)
+```
+
+
+```{r}
+durbinH(model_cl, "population_lag_2")## Using the package
+### Durbin's h statistic = 7.306299 (using the package)
+```
+### H0: rho = 0
+### H1: rho > 0
+### z_alpha
+
+```{r}
+qnorm(0.05, mean = 0, sd = 1, lower.tail = FALSE)
+```
+### Reject H0 if h > 1.65
+
+### Since h = -1.557034 < 1.65, we fail to reject H0.
+### Conclusion: Second order autocorrelation is not a problem.
+### Adding a lagged variable did  prove effective in correcting for autocorrelation.
+
+```{r}
+pred <- predict(model_cl, 
+                data.frame(time_2=71, population_lag_2 = 270248003, population_lag = 272690813 )) 
+
+pred
+## The prediction of population in the year 2000 is 275123641.
+
+
+pred_1 <- predict(model_cl, 
+                data.frame(time_2=72, population_lag_2 = 272690813, population_lag = 275123641 )) 
+pred_1
+
+## The prediction of population in the year 2000 is 277547105.
+
+```
+
+
+
+
