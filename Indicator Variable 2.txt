@@ -1,0 +1,71 @@
+#############################################################
+#### SOLVED EXAMPLE 6 - Interaction Variable  #################
+#############################################################
+
+HrlyWageData <- read.csv("SolvedExample2.csv") ## Same dataset as 2. Not a typo.
+
+## Create dummy variables
+Female_Dummy <- ifelse(HrlyWageData$Gender == "Female", 1, 0)   
+NW_NH_Dummy <- ifelse(HrlyWageData$Race1 == "Nonwhite and non-Hispanic", 1, 0)
+
+## Without interaction
+model_HrlyWage_Data <- lm(Wages_dollars ~ Education_years + Female_Dummy + 
+                            NW_NH_Dummy, data = HrlyWageData)
+
+summary(model_HrlyWage_Data)
+
+### With Interaction
+model_HrlyWage_Data_Interaction <- lm(Wages_dollars ~ Education_years + 
+                                        Female_Dummy + NW_NH_Dummy + 
+                                        Female_Dummy:NW_NH_Dummy, 
+                                      data = HrlyWageData)
+
+summary(model_HrlyWage_Data_Interaction)
+
+####################################################################
+#### SOLVED EXAMPLE 7 - Comparing Two Regressions  #################
+####################################################################
+
+SavingsIncomeData <- read.csv("SolvedExample7.csv")
+
+## Create dummy variables
+Pre1982 <- ifelse(SavingsIncomeData$Year < 1982, 0, 1)   
+Post1982 <- ifelse(SavingsIncomeData$Year > 1982, 1, 0)
+
+### With Interaction
+model_SavingsIncome <- lm(Personal.savings ~ Personal.Disposable.income + 
+                            Pre1982 + Pre1982:Personal.Disposable.income, 
+                          data = SavingsIncomeData)
+
+summary(model_SavingsIncome)
+
+##################################################################################
+#### SOLVED EXAMPLE 8 - Deseasonalization using Dummy Variables  #################
+##################################################################################
+
+FridgeSalesData <- read.csv("SolvedExample8.csv")
+
+## Create dummy variables
+Q1 <- ifelse(FridgeSalesData$Quarter == "Q1", 1, 0)   
+Q2 <- ifelse(FridgeSalesData$Quarter == "Q2", 1, 0)
+Q3 <- ifelse(FridgeSalesData$Quarter == "Q3", 1, 0)
+Q4 <- ifelse(FridgeSalesData$Quarter == "Q4", 1, 0)
+
+model_fridgesales <- lm(FridgeSalesData$FRIG ~ Q2 + Q3 + Q4, 
+                        data = FridgeSalesData)
+
+summary(model_fridgesales)
+
+##################################################################################
+#### SOLVED EXAMPLE 9 - Semilog Regressions With Dummy Variables  #################
+##################################################################################
+
+HrlyWageData <- read.csv("SolvedExample2.csv")
+
+## Create dummy variables
+Gender_Dummy <- ifelse(HrlyWageData$Gender == "Female", 1, 0)
+
+model_HrlyWageData <- lm(log(Wages_dollars) ~ Gender_Dummy, 
+                         data = HrlyWageData)
+
+summary(model_HrlyWageData)

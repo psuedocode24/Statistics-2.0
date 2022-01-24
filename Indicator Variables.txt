@@ -1,0 +1,130 @@
+###################################################################
+#### SOLVED EXAMPLE 1 - INDICATOR VARIABLES #######################
+###################################################################
+
+SchoolData <- read.csv("SolvedExample1.csv")
+
+## Create dummy variables
+NE_Dummy <- ifelse(SchoolData$Region == "Northeast or North Central", 1, 0)   
+S_Dummy <- ifelse(SchoolData$Region == "South", 1, 0)
+W_Dummy <- ifelse(SchoolData$Region == "West", 1, 0)
+
+model_SchoolData <- lm(Salary ~ NE_Dummy + S_Dummy, data = SchoolData)
+
+summary(model_SchoolData)
+
+### Find the mean salary for each region
+sal_means <- tapply(SchoolData$Salary, SchoolData$Region, mean)
+
+### OPTIONAL: MODEL WITHOUT INTERCEPT
+model_SchoolData_WOIntercept <- lm(Salary ~ 0 + NE_Dummy + S_Dummy + W_Dummy, 
+                                   data = SchoolData)
+
+summary(model_SchoolData_WOIntercept)
+
+###################################################################
+#### SOLVED EXAMPLE 2 - ANOVA Models with 2 dummies ###############
+###################################################################
+
+HrlyWageData <- read.csv("SolvedExample2.csv")
+
+## Create dummy variables
+Married_Dummy <- ifelse(HrlyWageData$MaritalStatus == "Married", 1, 0)
+South_Dummy <- ifelse(HrlyWageData$ResidRegion == "South", 1, 0)
+
+model_HrlyWageData <- lm(Wages_dollars ~ Married_Dummy + South_Dummy, 
+                         data = HrlyWageData)
+
+summary(model_HrlyWageData)
+
+#######################################################
+#### SOLVED EXAMPLE 3 - ANCOVA Model  #################
+#######################################################
+
+SchoolData_ANCOVA <- read.csv("SolvedExample1.csv")
+
+## Create dummy variables
+NE_Dummy <- ifelse(SchoolData_ANCOVA$Region == "Northeast or North Central", 1, 0)   
+S_Dummy <- ifelse(SchoolData_ANCOVA$Region == "South", 1, 0)
+W_Dummy <- ifelse(SchoolData_ANCOVA$Region == "West", 1, 0)
+
+model_SchoolData_ANCOVA <- lm(Salary ~ NE_Dummy + 
+                                      S_Dummy + 
+                                      Spending, data = SchoolData_ANCOVA)
+
+summary(model_SchoolData_ANCOVA)
+
+# car::vif(model_SchoolData_ANCOVA) # Not required at this time.
+
+#############################################################
+#### SOLVED EXAMPLE 4 - ANOVA/ANCOVA Model  #################
+#############################################################
+
+## ANOVA
+Accept_Rate_Data <- read.csv("SolvedExample4.csv")
+
+## Create dummy variables
+NE_Dummy <- ifelse(Accept_Rate_Data$Region == "N", 1, 0)   
+S_Dummy <- ifelse(Accept_Rate_Data$Region == "S", 1, 0)
+W_Dummy <- ifelse(Accept_Rate_Data$Region == "W", 1, 0)
+
+model_Accept_Rate_Data <- lm(Acceptance.Rate ~ NE_Dummy + W_Dummy, 
+                             data = Accept_Rate_Data)
+
+summary(model_Accept_Rate_Data)
+
+## The 𝑝-values for the differential intercept coefficients are 
+## statistically significant
+## – suggesting there is a significant difference in the mean 
+## acceptance rates between the:
+## Northeastern/North Central and Southern schools, and
+## Western and Southern schools.
+
+## ANCOVA
+model_Accept_Rate_Data_ANCOVA <- lm(Acceptance.Rate ~ NE_Dummy + W_Dummy + 
+                                      Tuition, data = Accept_Rate_Data)
+
+summary(model_Accept_Rate_Data_ANCOVA)
+
+#############################################################
+#### SOLVED EXAMPLE 5 - Interaction Variable  #################
+#############################################################
+
+DiscCase <- read.csv("SolvedExample5.csv")
+
+## Create dummy variables
+Male_Dummy <- ifelse(DiscCase$Gender == "Male", 1, 0)   
+Over_Dummy <- ifelse(DiscCase$Age == "Over", 1, 0)
+
+model_DiscCase <- lm(Salary ~ Experience + Male_Dummy + 
+                       Over_Dummy, data = DiscCase)
+
+summary(model_DiscCase)
+
+## With only Gender Dummy
+model_DiscCase_Gender <- lm(Salary ~ Experience + Male_Dummy, 
+                            data = DiscCase)
+
+summary(model_DiscCase_Gender)
+
+### Use interaction
+model_DiscCase_Interaction <- lm(Salary ~ Experience + Male_Dummy + 
+                                   Experience:Male_Dummy, data = DiscCase)
+
+summary(model_DiscCase_Interaction)
+
+### Create an interaction plot
+DiscCase_Males <- subset(DiscCase, DiscCase$Gender == "Male")
+DiscCase_Females <- subset(DiscCase, DiscCase$Gender == "Female")
+
+plot(DiscCase$Experience, DiscCase$Salary, 
+     main = "Interaction Plot",
+     xlab = "Experience (in years)",
+     ylab = "Salary (in 000s dollars)",
+     col = ifelse(DiscCase$Gender == "Male", "blue", "red"))
+legend("topleft", 
+       pch = c(1, 1), 
+       c("Female", "Male"), 
+       col = c("red", "blue"))
+abline(lm(DiscCase_Females$Salary ~ DiscCase_Females$Experience), col = "red")
+abline(lm(DiscCase_Males$Salary ~ DiscCase_Males$Experience), col = "blue")
